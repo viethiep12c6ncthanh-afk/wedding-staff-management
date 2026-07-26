@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: wedding-staff-management
+  datasource:
+    url: jdbc:mysql://localhost:3306/wedding_staff_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+    username: root
+    password: Ngaysinh11072003@
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    # Chuỗi Base64 dùng cho môi trường học tập; đổi trước khi triển khai thật.
+    secret: bXktdmVyeS1sb25nLWRldi1zZWNyZXQta2V5LWZvci1qd3Qtc2lnbmluZy0yMDI2
+    expiration-ms: 86400000

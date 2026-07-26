@@ -1,0 +1,7 @@
+package com.viethiep.weddingstaff.repository;
+
+import com.viethiep.weddingstaff.entity.Attendance;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
+}
