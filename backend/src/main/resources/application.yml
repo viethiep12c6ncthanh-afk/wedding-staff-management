@@ -1,13 +1,15 @@
 spring:
   application:
     name: wedding-staff-management
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
-    url: jdbc:mysql://localhost:3306/wedding_staff_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
-    username: root
-    password: Ngaysinh11072003@
+    url: "${DB_URL:jdbc:mysql://localhost:3306/wedding_staff_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh}"
+    username: "${DB_USERNAME:root}"
+    password: "${DB_PASSWORD}"
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:update}
     open-in-view: false
     properties:
       hibernate:
@@ -15,10 +17,14 @@ spring:
     show-sql: false
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 app:
   jwt:
-    # Chuỗi Base64 dùng cho môi trường học tập; đổi trước khi triển khai thật.
-    secret: bXktdmVyeS1sb25nLWRldi1zZWNyZXQta2V5LWZvci1qd3Qtc2lnbmluZy0yMDI2
-    expiration-ms: 86400000
+    secret: "${JWT_SECRET}"
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  seed:
+    enabled: ${SEED_ENABLED:false}
+    admin-password: "${SEED_ADMIN_PASSWORD:}"
+    coordinator-password: "${SEED_COORDINATOR_PASSWORD:}"
+    employee-password: "${SEED_EMPLOYEE_PASSWORD:}"
