@@ -11,26 +11,42 @@ CREATE TABLE users (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     role_id BIGINT NOT NULL,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(120) NOT NULL,
     email VARCHAR(120) UNIQUE,
-    phone VARCHAR(20),
-    enabled BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id)
+    phone VARCHAR(20) UNIQUE,
+    account_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    must_change_password BOOLEAN NOT NULL DEFAULT TRUE,
+    last_login_at DATETIME(6),
+    created_by BIGINT,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_users_role
+        FOREIGN KEY (role_id) REFERENCES roles(id),
+    CONSTRAINT fk_users_created_by
+        FOREIGN KEY (created_by) REFERENCES users(id)
+        ON DELETE SET NULL,
+    CONSTRAINT chk_users_account_status
+        CHECK (account_status IN ('ACTIVE', 'LOCKED'))
 );
 
 CREATE TABLE employees (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL UNIQUE,
     employee_code VARCHAR(30) NOT NULL UNIQUE,
-    status VARCHAR(30) NOT NULL,
+    employment_status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    date_of_birth DATE,
+    address VARCHAR(255),
     experience_level VARCHAR(50),
-    notes VARCHAR(500),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_employees_user FOREIGN KEY (user_id) REFERENCES users(id)
+    note VARCHAR(500),
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_employees_user
+        FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT chk_employees_employment_status
+        CHECK (employment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED'))
 );
 
 CREATE TABLE venues (
@@ -122,7 +138,17 @@ CREATE TABLE attendances (
     CONSTRAINT fk_attendances_confirmer FOREIGN KEY (confirmed_by) REFERENCES users(id)
 );
 
-CREATE INDEX idx_events_venue ON events(venue_id);
-CREATE INDEX idx_shifts_event_time ON shifts(event_id, start_at, end_at);
-CREATE INDEX idx_registrations_employee_status ON shift_registrations(employee_id, status);
-CREATE INDEX idx_assignments_employee_status ON shift_assignments(employee_id, status);
+CREATE INDEX idx_users_role_id
+    ON users(role_id);
+CREATE INDEX idx_users_account_status
+    ON users(account_status);
+CREATE INDEX idx_employees_employment_status
+    ON employees(employment_status);
+CREATE INDEX idx_events_venue
+    ON events(venue_id);
+CREATE INDEX idx_shifts_event_time
+    ON shifts(event_id, start_at, end_at);
+CREATE INDEX idx_registrations_employee_status
+    ON shift_registrations(employee_id, status);
+CREATE INDEX idx_assignments_employee_status
+    ON shift_assignments(employee_id, status);

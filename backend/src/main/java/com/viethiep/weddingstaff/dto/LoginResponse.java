@@ -4,5 +4,7 @@ public record LoginResponse(
         String token,
         String username,
         String fullName,
-        String role
-) {}
+        String role,
+        boolean mustChangePassword
+) {
+}

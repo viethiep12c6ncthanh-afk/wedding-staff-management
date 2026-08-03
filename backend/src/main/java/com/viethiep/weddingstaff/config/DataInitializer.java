@@ -3,6 +3,7 @@ package com.viethiep.weddingstaff.config;
 import com.viethiep.weddingstaff.entity.Employee;
 import com.viethiep.weddingstaff.entity.Role;
 import com.viethiep.weddingstaff.entity.UserAccount;
+import com.viethiep.weddingstaff.enumtype.AccountStatus;
 import com.viethiep.weddingstaff.enumtype.EmployeeStatus;
 import com.viethiep.weddingstaff.enumtype.RoleName;
 import com.viethiep.weddingstaff.repository.EmployeeRepository;
@@ -45,7 +46,13 @@ public class DataInitializer implements CommandLineRunner {
         Role coordinatorRole = role(RoleName.COORDINATOR);
         Role employeeRole = role(RoleName.EMPLOYEE);
 
-        createUser("admin", adminPassword, "Quản trị viên", "admin@example.com", adminRole);
+        createUser(
+                "admin",
+                adminPassword,
+                "Quản trị viên",
+                "admin@example.com",
+                adminRole
+        );
         createUser(
                 "coordinator",
                 coordinatorPassword,
@@ -65,9 +72,9 @@ public class DataInitializer implements CommandLineRunner {
             employeeRepository.save(Employee.builder()
                     .user(employeeUser)
                     .employeeCode("NV001")
-                    .status(EmployeeStatus.ACTIVE)
+                    .employmentStatus(EmployeeStatus.ACTIVE)
                     .experienceLevel("Mới")
-                    .notes("Tài khoản dữ liệu mẫu")
+                    .note("Tài khoản dữ liệu mẫu")
                     .build());
         }
     }
@@ -88,7 +95,9 @@ public class DataInitializer implements CommandLineRunner {
 
     private Role role(RoleName name) {
         return roleRepository.findByName(name)
-                .orElseGet(() -> roleRepository.save(Role.builder().name(name).build()));
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder().name(name).build()
+                ));
     }
 
     private UserAccount createUser(
@@ -102,10 +111,11 @@ public class DataInitializer implements CommandLineRunner {
                 .orElseGet(() -> userRepository.save(
                         UserAccount.builder()
                                 .username(username)
-                                .password(passwordEncoder.encode(rawPassword))
+                                .passwordHash(passwordEncoder.encode(rawPassword))
                                 .fullName(fullName)
                                 .email(email)
-                                .enabled(true)
+                                .accountStatus(AccountStatus.ACTIVE)
+                                .mustChangePassword(false)
                                 .role(role)
                                 .build()
                 ));

@@ -4,6 +4,8 @@ import com.viethiep.weddingstaff.enumtype.EmployeeStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,13 +25,20 @@ public class Employee extends BaseEntity {
     @Column(nullable = false, unique = true, length = 30)
     private String employeeCode;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private EmployeeStatus status;
+    @Column(name = "employment_status", nullable = false, length = 20)
+    private EmployeeStatus employmentStatus = EmployeeStatus.ACTIVE;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(length = 255)
+    private String address;
 
     @Column(length = 50)
     private String experienceLevel;
 
     @Column(length = 500)
-    private String notes;
+    private String note;
 }

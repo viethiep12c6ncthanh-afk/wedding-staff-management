@@ -11,6 +11,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -22,13 +24,24 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+                new UsernamePasswordAuthenticationToken(
+                        request.username(),
+                        request.password()
+                )
+        );
 
-        UserAccount user = userRepository.findByUsername(request.username()).orElseThrow();
+        UserAccount user = userRepository.findByUsername(request.username())
+                .orElseThrow();
+
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
+
         return new LoginResponse(
                 jwtService.generateToken(user),
                 user.getUsername(),
                 user.getFullName(),
-                user.getRole().getName().name());
+                user.getRole().getName().name(),
+                user.isMustChangePassword()
+        );
     }
 }
