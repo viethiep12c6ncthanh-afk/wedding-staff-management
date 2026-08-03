@@ -7,11 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface ShiftRegistrationRepository extends JpaRepository<ShiftRegistration, Long> {
     boolean existsByShiftIdAndEmployeeId(Long shiftId, Long employeeId);
+
     long countByShiftIdAndStatus(Long shiftId, RegistrationStatus status);
+
+    List<ShiftRegistration> findAllByShiftIdAndStatusIn(
+            Long shiftId,
+            Collection<RegistrationStatus> statuses
+    );
 
     @Query("""
         select r from ShiftRegistration r
@@ -23,5 +30,6 @@ public interface ShiftRegistrationRepository extends JpaRepository<ShiftRegistra
     List<ShiftRegistration> findApprovedOverlaps(
             @Param("employeeId") Long employeeId,
             @Param("startAt") LocalDateTime startAt,
-            @Param("endAt") LocalDateTime endAt);
+            @Param("endAt") LocalDateTime endAt
+    );
 }

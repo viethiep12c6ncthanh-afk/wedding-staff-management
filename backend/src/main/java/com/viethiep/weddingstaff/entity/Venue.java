@@ -22,10 +22,21 @@ public class Venue extends BaseEntity {
     @Column(nullable = false, length = 300)
     private String address;
 
-    @Column(length = 20)
+    @Column(name = "contact_name", length = 120)
+    private String contactName;
+
+    @Column(name = "contact_phone", length = 20)
     private String contactPhone;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private CommonStatus status;
+    @Column(name = "venue_status", nullable = false, length = 20)
+    private CommonStatus venueStatus = CommonStatus.ACTIVE;
+
+    @Column(length = 500)
+    private String note;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserAccount createdBy;
 }

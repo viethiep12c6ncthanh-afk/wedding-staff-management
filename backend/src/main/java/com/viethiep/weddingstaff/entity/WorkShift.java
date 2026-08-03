@@ -38,14 +38,26 @@ public class WorkShift extends BaseEntity {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal payAmount;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private boolean registrationOpen = false;
+    private LocalDateTime registrationDeadline;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private ShiftStatus status;
+    @Column(name = "shift_status", nullable = false, length = 20)
+    private ShiftStatus shiftStatus = ShiftStatus.DRAFT;
 
     @Column(length = 500)
-    private String note;
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserAccount createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelled_by")
+    private UserAccount cancelledBy;
+
+    private LocalDateTime cancelledAt;
+
+    @Column(length = 500)
+    private String cancellationReason;
 }

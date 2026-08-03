@@ -31,10 +31,24 @@ public class Event extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime endAt;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private EventStatus status;
+    @Column(name = "event_status", nullable = false, length = 20)
+    private EventStatus eventStatus = EventStatus.DRAFT;
 
     @Column(length = 1000)
     private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserAccount createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelled_by")
+    private UserAccount cancelledBy;
+
+    private LocalDateTime cancelledAt;
+
+    @Column(length = 500)
+    private String cancellationReason;
 }
