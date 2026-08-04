@@ -145,13 +145,16 @@ CREATE TABLE shift_registrations (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     shift_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
-    status VARCHAR(30) NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
     reviewed_by BIGINT,
-    reviewed_at DATETIME,
+    reviewed_at DATETIME(6),
     rejection_reason VARCHAR(500),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
+    cancelled_by BIGINT,
+    cancelled_at DATETIME(6),
+    cancellation_reason VARCHAR(500),
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT uk_registration_shift_employee
         UNIQUE (shift_id, employee_id),
     CONSTRAINT fk_registrations_shift
@@ -160,28 +163,56 @@ CREATE TABLE shift_registrations (
         FOREIGN KEY (employee_id) REFERENCES employees(id),
     CONSTRAINT fk_registrations_reviewer
         FOREIGN KEY (reviewed_by) REFERENCES users(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_registrations_cancelled_by
+        FOREIGN KEY (cancelled_by) REFERENCES users(id)
+        ON DELETE SET NULL,
+    CONSTRAINT chk_registrations_status CHECK (
+        status IN ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED')
+    )
 );
 
 CREATE TABLE shift_assignments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     shift_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
-    role_in_shift VARCHAR(80),
+    registration_id BIGINT UNIQUE,
+    assignment_source VARCHAR(20) NOT NULL,
+    shift_role VARCHAR(20) NOT NULL DEFAULT 'STAFF',
     area VARCHAR(100),
     task VARCHAR(300),
-    status VARCHAR(30) NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'ASSIGNED',
     assigned_by BIGINT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT uk_assignment_shift_employee
-        UNIQUE (shift_id, employee_id),
+    cancelled_by BIGINT,
+    cancelled_at DATETIME(6),
+    cancellation_reason VARCHAR(500),
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT fk_assignments_shift
         FOREIGN KEY (shift_id) REFERENCES shifts(id),
     CONSTRAINT fk_assignments_employee
         FOREIGN KEY (employee_id) REFERENCES employees(id),
+    CONSTRAINT fk_assignments_registration
+        FOREIGN KEY (registration_id) REFERENCES shift_registrations(id),
     CONSTRAINT fk_assignments_assigner
-        FOREIGN KEY (assigned_by) REFERENCES users(id)
+        FOREIGN KEY (assigned_by) REFERENCES users(id),
+    CONSTRAINT fk_assignments_cancelled_by
+        FOREIGN KEY (cancelled_by) REFERENCES users(id)
+        ON DELETE SET NULL,
+    CONSTRAINT chk_assignments_source CHECK (
+        (assignment_source = 'REGISTRATION' AND registration_id IS NOT NULL)
+        OR (assignment_source = 'DIRECT' AND registration_id IS NULL)
+    ),
+    CONSTRAINT chk_assignments_shift_role CHECK (
+        shift_role IN ('LEADER', 'STAFF')
+    ),
+    CONSTRAINT chk_assignments_status CHECK (
+        status IN (
+            'ASSIGNED', 'CONFIRMED', 'COMPLETED',
+            'ABSENT', 'CANCELLED'
+        )
+    )
 );
 
 CREATE TABLE attendances (
@@ -216,3 +247,9 @@ CREATE INDEX idx_registrations_employee_status
     ON shift_registrations(employee_id, status);
 CREATE INDEX idx_assignments_employee_status
     ON shift_assignments(employee_id, status);
+CREATE INDEX idx_assignments_shift_employee
+    ON shift_assignments(shift_id, employee_id);
+CREATE INDEX idx_assignments_shift_status
+    ON shift_assignments(shift_id, status);
+CREATE INDEX idx_assignments_source
+    ON shift_assignments(assignment_source);

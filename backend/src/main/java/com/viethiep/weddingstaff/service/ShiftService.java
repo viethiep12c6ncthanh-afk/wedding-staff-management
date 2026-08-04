@@ -99,23 +99,30 @@ public class ShiftService {
             shift.setCancelledBy(actor);
             shift.setCancelledAt(LocalDateTime.now());
             shift.setCancellationReason(reason);
-            cancelRegistrationsAndAssignments(shift);
+            cancelRegistrationsAndAssignments(shift, actor, reason);
         }
 
         shift.setShiftStatus(target);
         return toResponse(shift);
     }
 
-    private void cancelRegistrationsAndAssignments(WorkShift shift) {
+    private void cancelRegistrationsAndAssignments(
+            WorkShift shift,
+            UserAccount actor,
+            String reason
+    ) {
         registrationRepository.findAllByShiftIdAndStatusIn(
                 shift.getId(),
                 EnumSet.of(
                         RegistrationStatus.PENDING,
                         RegistrationStatus.APPROVED
                 )
-        ).forEach(registration ->
-                registration.setStatus(RegistrationStatus.CANCELLED)
-        );
+        ).forEach(registration -> {
+            registration.setStatus(RegistrationStatus.CANCELLED);
+            registration.setCancelledBy(actor);
+            registration.setCancelledAt(LocalDateTime.now());
+            registration.setCancellationReason(reason);
+        });
 
         assignmentRepository.findAllByShiftIdAndStatusIn(
                 shift.getId(),
@@ -123,9 +130,12 @@ public class ShiftService {
                         AssignmentStatus.ASSIGNED,
                         AssignmentStatus.CONFIRMED
                 )
-        ).forEach(assignment ->
-                assignment.setStatus(AssignmentStatus.CANCELLED)
-        );
+        ).forEach(assignment -> {
+            assignment.setStatus(AssignmentStatus.CANCELLED);
+            assignment.setCancelledBy(actor);
+            assignment.setCancelledAt(LocalDateTime.now());
+            assignment.setCancellationReason(reason);
+        });
     }
 
     private void validateTransition(ShiftStatus current, ShiftStatus target) {

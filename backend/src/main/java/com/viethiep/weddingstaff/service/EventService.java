@@ -116,9 +116,12 @@ public class EventService {
                             RegistrationStatus.PENDING,
                             RegistrationStatus.APPROVED
                     )
-            ).forEach(registration ->
-                    registration.setStatus(RegistrationStatus.CANCELLED)
-            );
+            ).forEach(registration -> {
+                registration.setStatus(RegistrationStatus.CANCELLED);
+                registration.setCancelledBy(actor);
+                registration.setCancelledAt(LocalDateTime.now());
+                registration.setCancellationReason(reason);
+            });
 
             assignmentRepository.findAllByShiftIdAndStatusIn(
                     shift.getId(),
@@ -126,9 +129,12 @@ public class EventService {
                             AssignmentStatus.ASSIGNED,
                             AssignmentStatus.CONFIRMED
                     )
-            ).forEach(assignment ->
-                    assignment.setStatus(AssignmentStatus.CANCELLED)
-            );
+            ).forEach(assignment -> {
+                assignment.setStatus(AssignmentStatus.CANCELLED);
+                assignment.setCancelledBy(actor);
+                assignment.setCancelledAt(LocalDateTime.now());
+                assignment.setCancellationReason(reason);
+            });
         }
     }
 
