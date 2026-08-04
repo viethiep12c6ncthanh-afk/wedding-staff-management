@@ -1,9 +1,9 @@
 package com.viethiep.weddingstaff.enumtype;
 
-public enum AttendanceStatus {
-    NOT_RECORDED,
+public enum AttendanceResult {
     PRESENT,
     LATE,
-    LEFT_EARLY,
+    EARLY_LEAVE,
+    LATE_AND_EARLY_LEAVE,
     ABSENT
 }

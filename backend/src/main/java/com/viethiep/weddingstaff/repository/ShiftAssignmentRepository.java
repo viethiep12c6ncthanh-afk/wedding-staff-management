@@ -2,6 +2,7 @@ package com.viethiep.weddingstaff.repository;
 
 import com.viethiep.weddingstaff.entity.ShiftAssignment;
 import com.viethiep.weddingstaff.enumtype.AssignmentStatus;
+import com.viethiep.weddingstaff.enumtype.ShiftRole;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -30,6 +31,21 @@ public interface ShiftAssignmentRepository
             Long shiftId,
             Long employeeId,
             Collection<AssignmentStatus> statuses
+    );
+
+    @Query("""
+            select count(assignment)
+            from ShiftAssignment assignment
+            where assignment.shift.id = :shiftId
+              and assignment.employee.user.username = :username
+              and assignment.shiftRole = :shiftRole
+              and assignment.status in :statuses
+            """)
+    long countLeaderAssignments(
+            @Param("shiftId") Long shiftId,
+            @Param("username") String username,
+            @Param("shiftRole") ShiftRole shiftRole,
+            @Param("statuses") Collection<AssignmentStatus> statuses
     );
 
     Optional<ShiftAssignment> findByRegistration_Id(Long registrationId);

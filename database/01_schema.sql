@@ -218,18 +218,68 @@ CREATE TABLE shift_assignments (
 CREATE TABLE attendances (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     assignment_id BIGINT NOT NULL UNIQUE,
-    check_in_at DATETIME,
-    check_out_at DATETIME,
-    status VARCHAR(30) NOT NULL,
+    process_status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+    attendance_result VARCHAR(30),
+    check_in_at DATETIME(6),
+    check_out_at DATETIME(6),
+    late_minutes INT UNSIGNED NOT NULL DEFAULT 0,
+    early_leave_minutes INT UNSIGNED NOT NULL DEFAULT 0,
     note VARCHAR(500),
+    recorded_by BIGINT NOT NULL,
+    recorded_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     confirmed_by BIGINT,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
+    confirmed_at DATETIME(6),
+    base_pay_snapshot DECIMAL(12,2),
+    payable_amount DECIMAL(12,2),
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT fk_attendances_assignment
         FOREIGN KEY (assignment_id) REFERENCES shift_assignments(id),
+    CONSTRAINT fk_attendances_recorder
+        FOREIGN KEY (recorded_by) REFERENCES users(id),
     CONSTRAINT fk_attendances_confirmer
-        FOREIGN KEY (confirmed_by) REFERENCES users(id)
+        FOREIGN KEY (confirmed_by) REFERENCES users(id),
+    CONSTRAINT chk_attendances_process_status CHECK (
+        process_status IN ('DRAFT', 'CONFIRMED')
+    ),
+    CONSTRAINT chk_attendances_result CHECK (
+        attendance_result IS NULL OR attendance_result IN (
+            'PRESENT', 'LATE', 'EARLY_LEAVE',
+            'LATE_AND_EARLY_LEAVE', 'ABSENT'
+        )
+    ),
+    CONSTRAINT chk_attendances_time_order CHECK (
+        check_in_at IS NULL OR check_out_at IS NULL
+        OR check_in_at < check_out_at
+    ),
+    CONSTRAINT chk_attendances_absent_time CHECK (
+        attendance_result <> 'ABSENT'
+        OR (check_in_at IS NULL AND check_out_at IS NULL)
+    ),
+    CONSTRAINT chk_attendances_minutes CHECK (
+        late_minutes >= 0 AND early_leave_minutes >= 0
+    ),
+    CONSTRAINT chk_attendances_confirmation CHECK (
+        (process_status = 'DRAFT'
+            AND confirmed_by IS NULL
+            AND confirmed_at IS NULL
+            AND base_pay_snapshot IS NULL
+            AND payable_amount IS NULL)
+        OR
+        (process_status = 'CONFIRMED'
+            AND attendance_result IS NOT NULL
+            AND confirmed_by IS NOT NULL
+            AND confirmed_at IS NOT NULL
+            AND base_pay_snapshot IS NOT NULL
+            AND payable_amount IS NOT NULL)
+    ),
+    CONSTRAINT chk_attendances_pay CHECK (
+        base_pay_snapshot IS NULL OR base_pay_snapshot >= 0
+    ),
+    CONSTRAINT chk_attendances_payable CHECK (
+        payable_amount IS NULL OR payable_amount >= 0
+    )
 );
 
 CREATE INDEX idx_users_role_id ON users(role_id);
@@ -253,3 +303,10 @@ CREATE INDEX idx_assignments_shift_status
     ON shift_assignments(shift_id, status);
 CREATE INDEX idx_assignments_source
     ON shift_assignments(assignment_source);
+
+CREATE INDEX idx_attendances_process_status
+    ON attendances(process_status);
+CREATE INDEX idx_attendances_result
+    ON attendances(attendance_result);
+CREATE INDEX idx_attendances_confirmed_at
+    ON attendances(confirmed_at);
