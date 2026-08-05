@@ -2,6 +2,6 @@ package com.viethiep.weddingstaff.enumtype;
 
 public enum EmployeeStatus {
     ACTIVE,
-    INACTIVE,
-    SUSPENDED
+    ON_LEAVE,
+    INACTIVE
 }

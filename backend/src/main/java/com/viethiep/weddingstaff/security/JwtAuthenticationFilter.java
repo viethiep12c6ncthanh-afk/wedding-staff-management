@@ -34,15 +34,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = jwtService.extractUsername(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtService.isValid(token, userDetails)) {
+                if (jwtService.isValid(token, userDetails) && canAuthenticate(userDetails)) {
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         } catch (RuntimeException ignored) {
-            // Token sai/hết hạn: để Spring Security trả 401 ở endpoint được bảo vệ.
+            // Token sai, hết hạn hoặc tài khoản không còn hợp lệ:
+            // để Spring Security trả 401/403 ở endpoint được bảo vệ.
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean canAuthenticate(UserDetails userDetails) {
+        return userDetails.isEnabled()
+                && userDetails.isAccountNonLocked()
+                && userDetails.isAccountNonExpired()
+                && userDetails.isCredentialsNonExpired();
     }
 }

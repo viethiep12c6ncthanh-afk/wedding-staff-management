@@ -28,7 +28,7 @@ CREATE TABLE users (
         FOREIGN KEY (created_by) REFERENCES users(id)
         ON DELETE SET NULL,
     CONSTRAINT chk_users_account_status
-        CHECK (account_status IN ('ACTIVE', 'LOCKED'))
+        CHECK (account_status IN ('ACTIVE', 'INACTIVE', 'LOCKED'))
 );
 
 CREATE TABLE employees (
@@ -46,7 +46,7 @@ CREATE TABLE employees (
     CONSTRAINT fk_employees_user
         FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT chk_employees_employment_status
-        CHECK (employment_status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED'))
+        CHECK (employment_status IN ('ACTIVE', 'ON_LEAVE', 'INACTIVE'))
 );
 
 CREATE TABLE venues (
