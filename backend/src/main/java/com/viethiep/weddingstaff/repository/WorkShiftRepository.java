@@ -1,6 +1,7 @@
 package com.viethiep.weddingstaff.repository;
 
 import com.viethiep.weddingstaff.entity.WorkShift;
+import com.viethiep.weddingstaff.enumtype.ShiftStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
+    long countByShiftStatus(ShiftStatus shiftStatus);
+
     @Query("""
             select shift
             from WorkShift shift

@@ -22,6 +22,8 @@ public interface ShiftAssignmentRepository
             Collection<AssignmentStatus> statuses
     );
 
+    long countByStatusIn(Collection<AssignmentStatus> statuses);
+
     long countByShiftIdAndStatusIn(
             Long shiftId,
             Collection<AssignmentStatus> statuses

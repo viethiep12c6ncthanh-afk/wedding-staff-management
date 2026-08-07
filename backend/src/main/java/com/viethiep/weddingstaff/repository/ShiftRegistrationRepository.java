@@ -17,6 +17,8 @@ public interface ShiftRegistrationRepository
 
     boolean existsByShiftIdAndEmployeeId(Long shiftId, Long employeeId);
 
+    long countByStatus(RegistrationStatus status);
+
     List<ShiftRegistration> findAllByShiftIdAndStatusIn(
             Long shiftId,
             Collection<RegistrationStatus> statuses

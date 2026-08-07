@@ -15,6 +15,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     boolean existsByEmployeeCode(String employeeCode);
 
+    long countByEmploymentStatus(EmployeeStatus employmentStatus);
+
     @Query("""
             select employee
             from Employee employee
