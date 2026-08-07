@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.AssignmentResponse;
 import com.viethiep.weddingstaff.dto.CancellationRequest;
 import com.viethiep.weddingstaff.dto.DirectAssignmentRequest;
@@ -49,16 +50,14 @@ public class AssignmentService {
         WorkShift shift = shiftRepository
                 .findByIdForUpdate(request.shiftId())
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy ca")
+                        new ResourceNotFoundException("Không tìm thấy ca")
                 );
         validateShiftAssignable(shift);
 
         Employee employee = employeeRepository
                 .findById(request.employeeId())
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy nhân viên"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy nhân viên")
                 );
         if (employee.getEmploymentStatus() != EmployeeStatus.ACTIVE) {
             throw new IllegalStateException(
@@ -73,9 +72,7 @@ public class AssignmentService {
         UserAccount assigner = userRepository
                 .findByUsername(assignerUsername)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy tài khoản phân công"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy tài khoản phân công")
                 );
 
         ShiftAssignment assignment = ShiftAssignment.builder()
@@ -102,9 +99,7 @@ public class AssignmentService {
         ShiftAssignment assignment = assignmentRepository
                 .findByIdForUpdate(assignmentId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy phân công"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy phân công")
                 );
 
         if (!ACTIVE_STATUSES.contains(assignment.getStatus())) {
@@ -123,9 +118,7 @@ public class AssignmentService {
 
         UserAccount actor = userRepository.findByUsername(actorUsername)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy tài khoản"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy tài khoản")
                 );
         LocalDateTime now = LocalDateTime.now();
         String reason = request.reason().trim();

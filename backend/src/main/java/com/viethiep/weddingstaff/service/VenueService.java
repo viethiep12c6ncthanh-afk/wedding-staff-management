@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.VenueRequest;
 import com.viethiep.weddingstaff.dto.VenueResponse;
 import com.viethiep.weddingstaff.dto.VenueStatusRequest;
@@ -70,12 +71,12 @@ public class VenueService {
 
     private Venue findVenue(Long id) {
         return venueRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy địa điểm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy địa điểm"));
     }
 
     private UserAccount findUser(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
     }
 
     private VenueResponse toResponse(Venue venue) {

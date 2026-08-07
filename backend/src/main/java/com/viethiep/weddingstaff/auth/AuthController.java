@@ -3,6 +3,7 @@ package com.viethiep.weddingstaff.auth;
 import com.viethiep.weddingstaff.dto.LoginRequest;
 import com.viethiep.weddingstaff.dto.LoginResponse;
 import com.viethiep.weddingstaff.entity.UserAccount;
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.repository.UserAccountRepository;
 import com.viethiep.weddingstaff.security.JwtService;
 import jakarta.validation.Valid;
@@ -31,7 +32,7 @@ public class AuthController {
         );
 
         UserAccount user = userRepository.findByUsername(request.username())
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
 
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);

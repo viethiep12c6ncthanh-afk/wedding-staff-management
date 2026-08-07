@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.AccountStatusRequest;
 import com.viethiep.weddingstaff.dto.CreateEmployeeRequest;
 import com.viethiep.weddingstaff.dto.EmployeeResponse;
@@ -154,12 +155,12 @@ public class EmployeeService {
 
     private Employee findEmployee(Long id) {
         return employeeRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên"));
     }
 
     private UserAccount findUser(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
     }
 
     private String normalizeUsername(String value) {

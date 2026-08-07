@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.CancellationRequest;
 import com.viethiep.weddingstaff.dto.RegistrationResponse;
 import com.viethiep.weddingstaff.dto.ReviewRegistrationRequest;
@@ -61,7 +62,7 @@ public class RegistrationService {
 
         WorkShift shift = shiftRepository.findById(shiftId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy ca")
+                        new ResourceNotFoundException("Không tìm thấy ca")
                 );
 
         if (shift.getShiftStatus() != ShiftStatus.OPEN) {
@@ -101,9 +102,7 @@ public class RegistrationService {
         ShiftRegistration registration = registrationRepository
                 .findByIdForUpdate(registrationId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy đăng ký"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy đăng ký")
                 );
 
         if (registration.getStatus() != RegistrationStatus.PENDING) {
@@ -113,7 +112,7 @@ public class RegistrationService {
         WorkShift shift = shiftRepository
                 .findByIdForUpdate(registration.getShift().getId())
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy ca")
+                        new ResourceNotFoundException("Không tìm thấy ca")
                 );
         validateShiftReviewable(shift);
 
@@ -175,9 +174,7 @@ public class RegistrationService {
         ShiftRegistration registration = registrationRepository
                 .findByIdForUpdate(registrationId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy đăng ký"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy đăng ký")
                 );
 
         if (!registration.getEmployee().getUser().getUsername()
@@ -230,18 +227,14 @@ public class RegistrationService {
     private Employee findEmployeeByUsername(String username) {
         return employeeRepository.findByUserUsername(username)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Tài khoản chưa có hồ sơ nhân viên"
-                        )
+                        new ResourceNotFoundException("Tài khoản chưa có hồ sơ nhân viên")
                 );
     }
 
     private UserAccount findUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Không tìm thấy tài khoản"
-                        )
+                        new ResourceNotFoundException("Không tìm thấy tài khoản")
                 );
     }
 

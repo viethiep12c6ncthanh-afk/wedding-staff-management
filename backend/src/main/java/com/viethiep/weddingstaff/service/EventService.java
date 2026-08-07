@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.EventRequest;
 import com.viethiep.weddingstaff.dto.EventResponse;
 import com.viethiep.weddingstaff.dto.EventStatusRequest;
@@ -183,7 +184,7 @@ public class EventService {
     private Venue findActiveVenue(Long venueId) {
         Venue venue = venueRepository.findById(venueId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy địa điểm")
+                        new ResourceNotFoundException("Không tìm thấy địa điểm")
                 );
 
         if (venue.getVenueStatus() != CommonStatus.ACTIVE) {
@@ -195,14 +196,14 @@ public class EventService {
     private Event findEvent(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy sự kiện")
+                        new ResourceNotFoundException("Không tìm thấy sự kiện")
                 );
     }
 
     private UserAccount findUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy tài khoản")
+                        new ResourceNotFoundException("Không tìm thấy tài khoản")
                 );
     }
 

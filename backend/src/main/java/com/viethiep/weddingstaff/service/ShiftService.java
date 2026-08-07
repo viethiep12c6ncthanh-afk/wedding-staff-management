@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.ShiftRequest;
 import com.viethiep.weddingstaff.dto.ShiftResponse;
 import com.viethiep.weddingstaff.dto.ShiftStatusRequest;
@@ -184,7 +185,7 @@ public class ShiftService {
     private Event findUsableEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy sự kiện")
+                        new ResourceNotFoundException("Không tìm thấy sự kiện")
                 );
 
         if (event.getEventStatus() == EventStatus.CANCELLED
@@ -199,14 +200,14 @@ public class ShiftService {
     private WorkShift findShift(Long id) {
         return shiftRepository.findById(id)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy ca")
+                        new ResourceNotFoundException("Không tìm thấy ca")
                 );
     }
 
     private UserAccount findUser(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Không tìm thấy tài khoản")
+                        new ResourceNotFoundException("Không tìm thấy tài khoản")
                 );
     }
 

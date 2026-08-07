@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.AttendanceResponse;
 import com.viethiep.weddingstaff.dto.CreateAttendanceRequest;
 import com.viethiep.weddingstaff.dto.UpdateAttendanceRequest;
@@ -58,9 +59,7 @@ public class AttendanceService {
     ) {
         ShiftAssignment assignment = assignmentRepository
                 .findByIdForUpdate(request.assignmentId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Không tìm thấy phân công"
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phân công"));
         ensureAssignmentCanBeAttended(assignment);
 
         if (attendanceRepository.existsByAssignment_Id(assignment.getId())) {
@@ -98,9 +97,7 @@ public class AttendanceService {
     ) {
         Attendance attendance = attendanceRepository
                 .findByIdForUpdate(attendanceId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Không tìm thấy chấm công"
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chấm công"));
         ensureDraft(attendance);
         ensureAssignmentCanBeAttended(attendance.getAssignment());
 
@@ -127,16 +124,12 @@ public class AttendanceService {
     ) {
         Attendance attendance = attendanceRepository
                 .findByIdForUpdate(attendanceId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Không tìm thấy chấm công"
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chấm công"));
         ensureDraft(attendance);
 
         ShiftAssignment assignment = assignmentRepository
                 .findByIdForUpdate(attendance.getAssignment().getId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Không tìm thấy phân công"
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phân công"));
         attendance.setAssignment(assignment);
         ensureAssignmentCanBeAttended(assignment);
         ensureReadyToConfirm(attendance);
@@ -316,9 +309,7 @@ public class AttendanceService {
 
     private UserAccount requireUser(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Không tìm thấy tài khoản"
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
     }
 
     private String trimToNull(String value) {

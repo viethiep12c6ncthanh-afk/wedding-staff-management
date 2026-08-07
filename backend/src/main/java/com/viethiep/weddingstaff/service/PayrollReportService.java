@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.exception.ResourceNotFoundException;
 import com.viethiep.weddingstaff.dto.PayrollEmployeeSummary;
 import com.viethiep.weddingstaff.dto.PayrollReportResponse;
 import com.viethiep.weddingstaff.entity.Attendance;
@@ -47,9 +48,7 @@ public class PayrollReportService {
 
         Employee employee = employeeRepository
                 .findByUserUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Không tìm thấy hồ sơ nhân viên"
-                ));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ nhân viên"));
 
         return buildReport(employee.getId(), from, to);
     }
