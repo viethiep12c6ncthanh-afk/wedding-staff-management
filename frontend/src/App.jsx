@@ -18,10 +18,11 @@ import ShiftsPage from './pages/shifts/ShiftsPage';
 import RegistrationsPage from './pages/registrations/RegistrationsPage';
 import AssignmentsPage from './pages/assignments/AssignmentsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
-import PlaceholderPage from './components/common/PlaceholderPage';
+import ReportsPage from './pages/reports/ReportsPage';
 
 import './styles/crud.css';
 import './styles/workflow.css';
+import './styles/report.css';
 
 function App() {
   return (
@@ -84,12 +85,7 @@ function App() {
 
             <Route
               path="/reports"
-              element={
-                <PlaceholderPage
-                  title="Báo cáo"
-                  description="Theo dõi tiền công và báo cáo."
-                />
-              }
+              element={<ReportsPage />}
             />
           </Route>
         </Route>

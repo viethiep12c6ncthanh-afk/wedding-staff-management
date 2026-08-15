@@ -9,7 +9,7 @@ const managementItems = [
   { path: '/registrations', label: 'Đăng ký ca' },
   { path: '/assignments', label: 'Phân công' },
   { path: '/attendance', label: 'Chấm công' },
-  { path: '/reports', label: 'Báo cáo' },
+  { path: '/reports', label: 'Báo cáo tiền công' },
 ];
 
 const employeeItems = [
