@@ -1,0 +1,116 @@
+/* COMMIT 12 - REGISTRATION / ASSIGNMENT / ATTENDANCE */
+
+.workflow-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.workflow-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+}
+
+.workflow-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.workflow-card h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.workflow-card p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.workflow-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.detail-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.detail-list > div {
+  display: grid;
+  grid-template-columns: 115px 1fr;
+  gap: 10px;
+}
+
+.detail-list dt {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.detail-list dd {
+  margin: 0;
+  color: #172033;
+  font-size: 13px;
+}
+
+.muted-text {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.checkbox-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 9px !important;
+  min-height: 42px;
+}
+
+.checkbox-label input {
+  width: 17px !important;
+  min-height: 17px !important;
+  margin: 0;
+}
+
+.status-pending,
+.status-assigned {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-approved,
+.status-present {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-rejected,
+.status-absent {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.status-late,
+.status-early_leave,
+.status-late_and_early_leave {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+@media (max-width: 900px) {
+  .workflow-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,12 +1,12 @@
 import {
   BrowserRouter,
-  Navigate,
   Route,
   Routes,
 } from 'react-router-dom';
 
-import PlaceholderPage from './components/common/PlaceholderPage';
+import HomeRedirect from './components/common/HomeRedirect';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import RoleRoute from './components/common/RoleRoute';
 import MainLayout from './layouts/MainLayout';
 
 import LoginPage from './pages/auth/LoginPage';
@@ -15,8 +15,13 @@ import EmployeesPage from './pages/employees/EmployeesPage';
 import VenuesPage from './pages/venues/VenuesPage';
 import EventsPage from './pages/events/EventsPage';
 import ShiftsPage from './pages/shifts/ShiftsPage';
+import RegistrationsPage from './pages/registrations/RegistrationsPage';
+import AssignmentsPage from './pages/assignments/AssignmentsPage';
+import AttendancePage from './pages/attendance/AttendancePage';
+import PlaceholderPage from './components/common/PlaceholderPage';
 
 import './styles/crud.css';
+import './styles/workflow.css';
 
 function App() {
   return (
@@ -30,58 +35,51 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route
-              path="/dashboard"
-              element={<DashboardPage />}
-            />
+              element={
+                <RoleRoute
+                  allowedRoles={['ADMIN', 'COORDINATOR']}
+                />
+              }
+            >
+              <Route
+                path="/dashboard"
+                element={<DashboardPage />}
+              />
 
-            <Route
-              path="/employees"
-              element={<EmployeesPage />}
-            />
+              <Route
+                path="/employees"
+                element={<EmployeesPage />}
+              />
 
-            <Route
-              path="/venues"
-              element={<VenuesPage />}
-            />
+              <Route
+                path="/venues"
+                element={<VenuesPage />}
+              />
 
-            <Route
-              path="/events"
-              element={<EventsPage />}
-            />
+              <Route
+                path="/events"
+                element={<EventsPage />}
+              />
 
-            <Route
-              path="/shifts"
-              element={<ShiftsPage />}
-            />
+              <Route
+                path="/shifts"
+                element={<ShiftsPage />}
+              />
+
+              <Route
+                path="/assignments"
+                element={<AssignmentsPage />}
+              />
+            </Route>
 
             <Route
               path="/registrations"
-              element={
-                <PlaceholderPage
-                  title="Đăng ký ca"
-                  description="Theo dõi đăng ký ca của nhân viên."
-                />
-              }
-            />
-
-            <Route
-              path="/assignments"
-              element={
-                <PlaceholderPage
-                  title="Phân công"
-                  description="Quản lý nhân sự được phân công vào ca."
-                />
-              }
+              element={<RegistrationsPage />}
             />
 
             <Route
               path="/attendance"
-              element={
-                <PlaceholderPage
-                  title="Chấm công"
-                  description="Theo dõi kết quả chấm công."
-                />
-              }
+              element={<AttendancePage />}
             />
 
             <Route
@@ -96,15 +94,8 @@ function App() {
           </Route>
         </Route>
 
-        <Route
-          path="/"
-          element={<Navigate to="/dashboard" replace />}
-        />
-
-        <Route
-          path="*"
-          element={<Navigate to="/dashboard" replace />}
-        />
+        <Route path="/" element={<HomeRedirect />} />
+        <Route path="*" element={<HomeRedirect />} />
       </Routes>
     </BrowserRouter>
   );
