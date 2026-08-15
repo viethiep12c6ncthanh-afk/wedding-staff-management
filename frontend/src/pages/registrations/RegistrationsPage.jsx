@@ -91,7 +91,26 @@ function RegistrationsPage() {
   );
 
   const availableShifts = useMemo(
-    () => shifts.filter((shift) => shift.shiftStatus === 'OPEN'),
+    () =>
+      shifts
+        .filter((shift) => {
+          if (shift.shiftStatus !== 'OPEN') {
+            return false;
+          }
+
+          if (!shift.registrationDeadline) {
+            return true;
+          }
+
+          const deadline = new Date(shift.registrationDeadline);
+          return !Number.isNaN(deadline.getTime()) &&
+            deadline.getTime() > Date.now();
+        })
+        .sort(
+          (first, second) =>
+            new Date(first.startAt).getTime() -
+            new Date(second.startAt).getTime(),
+        ),
     [shifts],
   );
 
@@ -409,6 +428,7 @@ function RegistrationsPage() {
 
       <Modal
         open={Boolean(reviewing)}
+        error={error}
         title={`Xử lý đăng ký #${reviewing?.id ?? ''}`}
         onClose={() => !saving && setReviewing(null)}
         footer={(

@@ -4,6 +4,7 @@ function Modal({
   onClose,
   children,
   footer,
+  error = '',
   wide = false,
 }) {
   if (!open) {
@@ -37,6 +38,12 @@ function Modal({
         </header>
 
         <div className="modal-body">
+          {error && (
+            <div className="error-box modal-error-box" role="alert">
+              {error}
+            </div>
+          )}
+
           {children}
         </div>
 

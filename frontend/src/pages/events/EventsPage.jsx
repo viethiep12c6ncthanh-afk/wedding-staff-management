@@ -341,6 +341,7 @@ function EventsPage() {
 
       <Modal
         open={modalOpen}
+        error={error}
         title={editing ? 'Cập nhật sự kiện' : 'Thêm sự kiện'}
         onClose={() => !saving && setModalOpen(false)}
         wide

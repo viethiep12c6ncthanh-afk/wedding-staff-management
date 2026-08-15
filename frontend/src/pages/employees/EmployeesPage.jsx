@@ -378,6 +378,7 @@ function EmployeesPage() {
 
       <Modal
         open={createOpen}
+        error={error}
         title="Thêm nhân viên"
         onClose={() => !saving && setCreateOpen(false)}
         wide
@@ -520,6 +521,7 @@ function EmployeesPage() {
 
       <Modal
         open={Boolean(editing && editForm)}
+        error={error}
         title={`Cập nhật ${editing?.employeeCode || ''}`}
         onClose={() => !saving && setEditing(null)}
         wide

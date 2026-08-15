@@ -368,6 +368,7 @@ function ShiftsPage() {
 
       <Modal
         open={modalOpen}
+        error={error}
         title={editing ? 'Cập nhật ca làm' : 'Thêm ca làm'}
         onClose={() => !saving && setModalOpen(false)}
         wide

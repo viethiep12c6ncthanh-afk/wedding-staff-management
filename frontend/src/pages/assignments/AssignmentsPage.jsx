@@ -307,6 +307,7 @@ function AssignmentsPage() {
 
       <Modal
         open={modalOpen}
+        error={error}
         title="Phân công trực tiếp"
         onClose={() => !saving && setModalOpen(false)}
         wide

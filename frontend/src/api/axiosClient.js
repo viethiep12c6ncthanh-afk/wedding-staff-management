@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+const apiBaseUrl = (
+    import.meta.env.VITE_API_BASE_URL ||
+    'http://localhost:8080/api'
+).replace(/\/+$/, '');
+
+const clearSession = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+};
+
 const axiosClient = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: apiBaseUrl,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -24,8 +34,11 @@ axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('currentUser');
+            clearSession();
+
+            if (window.location.pathname !== '/login') {
+                window.location.replace('/login');
+            }
         }
 
         return Promise.reject(error);

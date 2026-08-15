@@ -103,6 +103,17 @@ function AttendancePage() {
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
 
+    if (name === 'absent' && type === 'checkbox') {
+      setForm((previous) => ({
+        ...previous,
+        absent: checked,
+        ...(checked
+          ? { checkInAt: '', checkOutAt: '' }
+          : {}),
+      }));
+      return;
+    }
+
     setForm((previous) => ({
       ...previous,
       [name]: type === 'checkbox' ? checked : value,
@@ -334,6 +345,7 @@ function AttendancePage() {
 
       <Modal
         open={modalOpen}
+        error={error}
         title={editing ? 'Cập nhật chấm công' : 'Ghi nhận chấm công'}
         onClose={() => !saving && setModalOpen(false)}
         wide
@@ -397,6 +409,12 @@ function AttendancePage() {
             />
             Nhân viên vắng mặt
           </label>
+
+          {form.absent && (
+            <p className="form-span-2 muted-text attendance-absent-note">
+              Khi đánh dấu vắng mặt, giờ vào và giờ ra sẽ được để trống.
+            </p>
+          )}
 
           {!form.absent && (
             <>

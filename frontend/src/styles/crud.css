@@ -358,3 +358,13 @@
     min-width: 0;
   }
 }
+
+
+/* COMMIT 14 - FINAL INTEGRATION POLISH */
+.modal-error-box {
+  margin-bottom: 18px;
+}
+
+.attendance-absent-note {
+  margin: -4px 0 4px;
+}

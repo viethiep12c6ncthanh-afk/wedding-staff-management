@@ -304,6 +304,7 @@ function VenuesPage() {
 
       <Modal
         open={createOpen}
+        error={error}
         title={editing ? 'Cập nhật địa điểm' : 'Thêm địa điểm'}
         onClose={() => !saving && setCreateOpen(false)}
         footer={(

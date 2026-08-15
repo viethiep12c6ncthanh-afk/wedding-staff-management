@@ -2,6 +2,12 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import Sidebar from '../components/common/Sidebar';
 
+const roleLabels = {
+    ADMIN: 'Quản trị viên',
+    COORDINATOR: 'Điều phối viên',
+    EMPLOYEE: 'Nhân viên',
+};
+
 function MainLayout() {
     const navigate = useNavigate();
 
@@ -36,11 +42,16 @@ function MainLayout() {
                     <div className="topbar-user">
                         <div className="user-info">
                             <strong>
-                                {currentUser?.username || 'Người dùng'}
+                                {currentUser?.fullName ||
+                                    currentUser?.username ||
+                                    'Người dùng'}
                             </strong>
 
                             {currentUser?.role && (
-                                <span>{currentUser.role}</span>
+                                <span>
+                                    {roleLabels[currentUser.role] ||
+                                        currentUser.role}
+                                </span>
                             )}
                         </div>
 
