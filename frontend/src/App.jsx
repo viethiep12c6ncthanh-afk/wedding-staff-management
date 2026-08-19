@@ -11,6 +11,7 @@ import MainLayout from './layouts/MainLayout';
 
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import CoordinationPage from './pages/coordination/CoordinationPage';
 import EmployeesPage from './pages/employees/EmployeesPage';
 import VenuesPage from './pages/venues/VenuesPage';
 import EventsPage from './pages/events/EventsPage';
@@ -21,6 +22,7 @@ import AttendancePage from './pages/attendance/AttendancePage';
 import ReportsPage from './pages/reports/ReportsPage';
 
 import './styles/crud.css';
+import './styles/coordination.css';
 import './styles/workflow.css';
 import './styles/report.css';
 
@@ -45,6 +47,11 @@ function App() {
               <Route
                 path="/dashboard"
                 element={<DashboardPage />}
+              />
+
+              <Route
+                path="/coordination"
+                element={<CoordinationPage />}
               />
 
               <Route

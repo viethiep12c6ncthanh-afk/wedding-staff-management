@@ -76,6 +76,25 @@ public interface ShiftAssignmentRepository
             join fetch event.venue
             join fetch assignment.employee employee
             join fetch employee.user
+            where assignment.status in :statuses
+              and shift.startAt < :endAt
+              and shift.endAt > :startAt
+            order by employee.id asc, shift.startAt asc, assignment.id asc
+            """)
+    List<ShiftAssignment> findAllForCoordinationWindow(
+            @Param("startAt") LocalDateTime startAt,
+            @Param("endAt") LocalDateTime endAt,
+            @Param("statuses") Collection<AssignmentStatus> statuses
+    );
+
+    @Query("""
+            select assignment
+            from ShiftAssignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user
             join fetch assignment.assignedBy
             left join fetch assignment.registration
             order by assignment.createdAt desc

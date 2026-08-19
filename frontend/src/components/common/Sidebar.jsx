@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 
 const managementItems = [
   { path: '/dashboard', label: 'Tổng quan' },
+  { path: '/coordination', label: 'Điều phối' },
   { path: '/employees', label: 'Nhân viên' },
   { path: '/venues', label: 'Địa điểm' },
   { path: '/events', label: 'Sự kiện' },

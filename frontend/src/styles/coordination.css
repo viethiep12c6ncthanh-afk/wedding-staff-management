@@ -1,0 +1,213 @@
+.coordination-page {
+  display: block;
+}
+
+.coordination-filter-card {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+}
+
+.coordination-filter-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.coordination-filter-card input,
+.coordination-filter-card select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  outline: none;
+}
+
+.coordination-filter-card input:focus,
+.coordination-filter-card select:focus {
+  border-color: #475569;
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.08);
+}
+
+.coordination-filter-button {
+  min-height: 42px;
+}
+
+.coordination-filter-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.coordination-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.coordination-context strong {
+  color: #172033;
+}
+
+.coordination-table {
+  min-width: 1050px;
+}
+
+.coordination-missing {
+  margin-top: 4px;
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.coordination-extra {
+  margin-top: 4px;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.coordination-staffing-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.staffing-understaffed {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.staffing-full {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.staffing-overstaffed {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.coordination-issues {
+  display: grid;
+  gap: 13px;
+}
+
+.coordination-issue-card {
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left-width: 4px;
+  border-radius: 10px;
+}
+
+.issue-overlap_conflict {
+  border-left-color: #dc2626;
+}
+
+.issue-insufficient_transition_time {
+  border-left-color: #d97706;
+}
+
+.coordination-issue-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.coordination-issue-header div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.coordination-issue-header span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.coordination-issue-header b {
+  font-size: 12px;
+}
+
+.coordination-issue-route {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-top: 15px;
+  padding: 13px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.coordination-issue-route > div:not(.coordination-route-arrow) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coordination-issue-route span,
+.coordination-issue-route small {
+  color: #64748b;
+}
+
+.coordination-route-arrow {
+  color: #94a3b8;
+  font-size: 20px;
+}
+
+.coordination-issue-card p {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1100px) {
+  .coordination-filter-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .coordination-filter-card {
+    grid-template-columns: 1fr;
+  }
+
+  .coordination-context,
+  .coordination-issue-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .coordination-issue-route {
+    grid-template-columns: 1fr;
+  }
+
+  .coordination-route-arrow {
+    transform: rotate(90deg);
+    justify-self: start;
+  }
+}
