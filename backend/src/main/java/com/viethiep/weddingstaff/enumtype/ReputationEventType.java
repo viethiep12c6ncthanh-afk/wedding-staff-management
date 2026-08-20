@@ -1,0 +1,11 @@
+package com.viethiep.weddingstaff.enumtype;
+
+public enum ReputationEventType {
+    BASELINE_INITIALIZED,
+    ATTENDANCE_PRESENT,
+    ATTENDANCE_LATE,
+    ATTENDANCE_EARLY_LEAVE,
+    ATTENDANCE_LATE_AND_EARLY_LEAVE,
+    ATTENDANCE_ABSENT,
+    EVALUATION_RATING
+}

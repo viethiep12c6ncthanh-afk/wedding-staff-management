@@ -30,6 +30,8 @@ class AttendanceServiceTest {
     private ShiftAssignmentRepository assignmentRepository;
     @Mock
     private UserAccountRepository userRepository;
+    @Mock
+    private ReputationService reputationService;
 
     @InjectMocks
     private AttendanceService service;
@@ -122,6 +124,7 @@ class AttendanceServiceTest {
         assertEquals(new BigDecimal("100000.00"), response.basePaySnapshot());
         assertEquals(new BigDecimal("0.00"), response.payableAmount());
         assertEquals(AssignmentStatus.ABSENT, assignment.getStatus());
+        verify(reputationService).applyConfirmedAttendance(attendance, admin);
     }
 
     @Test

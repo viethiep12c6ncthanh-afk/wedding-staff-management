@@ -20,11 +20,13 @@ import RegistrationsPage from './pages/registrations/RegistrationsPage';
 import AssignmentsPage from './pages/assignments/AssignmentsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
 import ReportsPage from './pages/reports/ReportsPage';
+import ReputationPage from './pages/reputation/ReputationPage';
 
 import './styles/crud.css';
 import './styles/coordination.css';
 import './styles/workflow.css';
 import './styles/report.css';
+import './styles/reputation.css';
 
 function App() {
   return (
@@ -88,6 +90,11 @@ function App() {
             <Route
               path="/attendance"
               element={<AttendancePage />}
+            />
+
+            <Route
+              path="/reputation"
+              element={<ReputationPage />}
             />
 
             <Route

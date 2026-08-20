@@ -35,6 +35,7 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final ShiftAssignmentRepository assignmentRepository;
     private final UserAccountRepository userRepository;
+    private final ReputationService reputationService;
 
     @Transactional(readOnly = true)
     public List<AttendanceResponse> findAll() {
@@ -160,6 +161,8 @@ public class AttendanceService {
                         ? AssignmentStatus.ABSENT
                         : AssignmentStatus.COMPLETED
         );
+
+        reputationService.applyConfirmedAttendance(attendance, confirmer);
 
         return toResponse(attendance);
     }

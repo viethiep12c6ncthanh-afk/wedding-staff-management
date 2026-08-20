@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const managementItems = [
   { path: '/dashboard', label: 'Tổng quan' },
   { path: '/coordination', label: 'Điều phối' },
+  { path: '/reputation', label: 'Uy tín nhân viên' },
   { path: '/employees', label: 'Nhân viên' },
   { path: '/venues', label: 'Địa điểm' },
   { path: '/events', label: 'Sự kiện' },
@@ -16,6 +17,7 @@ const managementItems = [
 const employeeItems = [
   { path: '/registrations', label: 'Đăng ký ca' },
   { path: '/attendance', label: 'Chấm công của tôi' },
+  { path: '/reputation', label: 'Uy tín của tôi' },
   { path: '/reports', label: 'Tiền công của tôi' },
 ];
 
