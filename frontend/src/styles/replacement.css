@@ -1,0 +1,316 @@
+.replacement-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.replacement-form-card,
+.replacement-request-card {
+  overflow: hidden;
+}
+
+.replacement-card-heading {
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.replacement-card-heading-row,
+.replacement-card-top,
+.replacement-actions,
+.replacement-form-actions,
+.replacement-invite-form,
+.replacement-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.replacement-card-heading strong,
+.replacement-card-heading span {
+  display: block;
+}
+
+.replacement-card-heading strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.replacement-card-heading span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.replacement-request-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(320px, 2fr);
+  gap: 14px;
+  padding: 18px;
+}
+
+.replacement-request-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.replacement-request-form select,
+.replacement-request-form textarea,
+.replacement-invite-form select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+}
+
+.replacement-request-form textarea {
+  resize: vertical;
+}
+
+.replacement-form-actions {
+  grid-column: 1 / -1;
+}
+
+.replacement-form-actions span {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.replacement-invitation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.replacement-invitation-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+.replacement-card-top {
+  align-items: flex-start;
+}
+
+.replacement-card-top h3,
+.replacement-card-top p {
+  margin: 0;
+}
+
+.replacement-card-top h3 {
+  color: #172033;
+  font-size: 16px;
+}
+
+.replacement-card-top p {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.replacement-meta {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.replacement-actions {
+  justify-content: flex-end;
+}
+
+.replacement-request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.replacement-request-status {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.replacement-request-status.status-pending,
+.replacement-request-status.status-open {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.replacement-request-status.status-filled {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.replacement-request-status.status-rejected,
+.replacement-request-status.status-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.replacement-request-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 18px 18px;
+}
+
+.replacement-request-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.replacement-request-summary > div {
+  padding: 10px 11px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.replacement-request-summary span,
+.replacement-request-summary strong {
+  display: block;
+}
+
+.replacement-request-summary span {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.replacement-request-summary strong {
+  margin-top: 4px;
+  color: #172033;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.replacement-invite-form {
+  justify-content: flex-start;
+  padding: 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.replacement-invite-form select {
+  max-width: 480px;
+}
+
+.replacement-invitation-history {
+  display: grid;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.replacement-invitation-history > strong {
+  color: #475569;
+  font-size: 12px;
+}
+
+.replacement-invitation-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 150px 180px;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 11px;
+}
+
+.replacement-invitation-row small {
+  color: #94a3b8;
+  text-align: right;
+}
+
+.replacement-response-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.replacement-history-row {
+  padding: 12px 14px;
+}
+
+.replacement-history-row strong,
+.replacement-history-row span {
+  display: block;
+}
+
+.replacement-history-row > div span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.replacement-history-row > span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.replacement-empty {
+  padding: 28px;
+  color: #64748b;
+  text-align: center;
+}
+
+.status-accepted,
+.status-filled {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-declined {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1000px) {
+  .replacement-request-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .replacement-request-form,
+  .replacement-invitation-grid,
+  .replacement-request-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .replacement-card-heading-row,
+  .replacement-card-top,
+  .replacement-actions,
+  .replacement-form-actions,
+  .replacement-invite-form,
+  .replacement-history-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .replacement-invitation-row {
+    grid-template-columns: 1fr;
+  }
+
+  .replacement-invitation-row small {
+    text-align: left;
+  }
+}

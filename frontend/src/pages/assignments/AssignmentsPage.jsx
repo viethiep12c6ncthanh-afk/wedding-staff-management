@@ -256,7 +256,9 @@ function AssignmentsPage() {
                       <td>
                         {assignment.assignmentSource === 'DIRECT'
                           ? 'Trực tiếp'
-                          : 'Từ đăng ký'}
+                          : assignment.assignmentSource === 'REPLACEMENT'
+                            ? 'Thay ca'
+                            : 'Từ đăng ký'}
                       </td>
 
                       <td>

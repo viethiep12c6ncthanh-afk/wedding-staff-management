@@ -21,12 +21,14 @@ import AssignmentsPage from './pages/assignments/AssignmentsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import ReputationPage from './pages/reputation/ReputationPage';
+import ReplacementPage from './pages/replacements/ReplacementPage';
 
 import './styles/crud.css';
 import './styles/coordination.css';
 import './styles/workflow.css';
 import './styles/report.css';
 import './styles/reputation.css';
+import './styles/replacement.css';
 
 function App() {
   return (
@@ -95,6 +97,11 @@ function App() {
             <Route
               path="/reputation"
               element={<ReputationPage />}
+            />
+
+            <Route
+              path="/replacements"
+              element={<ReplacementPage />}
             />
 
             <Route
