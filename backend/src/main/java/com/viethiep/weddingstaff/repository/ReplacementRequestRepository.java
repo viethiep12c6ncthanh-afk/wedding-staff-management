@@ -64,6 +64,20 @@ public interface ReplacementRequestRepository
             @Param("username") String username
     );
 
+
+    @Query("""
+            select request
+            from ReplacementRequest request
+            join fetch request.originalAssignment original
+            join fetch original.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch original.employee originalEmployee
+            join fetch originalEmployee.user
+            where request.id = :id
+            """)
+    Optional<ReplacementRequest> findByIdWithDetails(@Param("id") Long id);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select request

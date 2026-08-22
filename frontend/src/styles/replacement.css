@@ -314,3 +314,157 @@
     text-align: left;
   }
 }
+
+.replacement-candidate-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.replacement-candidate-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.replacement-candidate-heading strong,
+.replacement-candidate-heading span {
+  display: block;
+}
+
+.replacement-candidate-heading strong {
+  color: #172033;
+  font-size: 13px;
+}
+
+.replacement-candidate-heading > div > span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.replacement-rule-badge {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.replacement-candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.replacement-candidate-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.replacement-candidate-rank {
+  color: #334155;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.replacement-candidate-main {
+  min-width: 0;
+}
+
+.replacement-candidate-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.replacement-candidate-name strong {
+  color: #172033;
+  font-size: 12px;
+}
+
+.replacement-candidate-name span {
+  color: #0f766e;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.replacement-candidate-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.replacement-candidate-metrics span {
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+}
+
+.replacement-candidate-reasons {
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.replacement-candidate-reasons summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.replacement-candidate-reasons ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  line-height: 1.6;
+}
+
+.replacement-candidate-empty {
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .replacement-candidate-heading,
+  .replacement-candidate-name {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .replacement-candidate-row {
+    grid-template-columns: 1fr;
+  }
+
+  .replacement-candidate-rank {
+    text-align: left;
+  }
+
+  .replacement-candidate-name span {
+    white-space: normal;
+  }
+}

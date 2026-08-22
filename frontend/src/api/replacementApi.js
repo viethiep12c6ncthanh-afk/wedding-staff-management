@@ -5,6 +5,12 @@ export const getReplacementRequests = async () => {
   return response.data;
 };
 
+
+export const getReplacementCandidates = async (id) => {
+  const response = await axiosClient.get(`/replacements/requests/${id}/candidates`);
+  return response.data;
+};
+
 export const getMyReplacementRequests = async () => {
   const response = await axiosClient.get('/replacements/requests/mine');
   return response.data;

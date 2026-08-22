@@ -1,6 +1,7 @@
 package com.viethiep.weddingstaff.controller;
 
 import com.viethiep.weddingstaff.dto.*;
+import com.viethiep.weddingstaff.service.CandidateRecommendationService;
 import com.viethiep.weddingstaff.service.ReplacementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReplacementController {
     private final ReplacementService replacementService;
+    private final CandidateRecommendationService candidateRecommendationService;
 
     @GetMapping("/requests")
     @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
     public List<ReplacementRequestResponse> findAllRequests() {
         return replacementService.findAllRequests();
+    }
+
+
+    @GetMapping("/requests/{id}/candidates")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
+    public List<ReplacementCandidateResponse> findCandidates(
+            @PathVariable Long id
+    ) {
+        return candidateRecommendationService.findCandidates(id);
     }
 
     @GetMapping("/requests/mine")

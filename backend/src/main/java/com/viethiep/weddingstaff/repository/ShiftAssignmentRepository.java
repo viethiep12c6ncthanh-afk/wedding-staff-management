@@ -29,6 +29,18 @@ public interface ShiftAssignmentRepository
             Collection<AssignmentStatus> statuses
     );
 
+
+    long countByEmployeeIdAndStatus(
+            Long employeeId,
+            AssignmentStatus status
+    );
+
+    long countByEmployeeIdAndShiftRoleAndStatus(
+            Long employeeId,
+            ShiftRole shiftRole,
+            AssignmentStatus status
+    );
+
     boolean existsByShiftIdAndEmployeeIdAndStatusIn(
             Long shiftId,
             Long employeeId,
