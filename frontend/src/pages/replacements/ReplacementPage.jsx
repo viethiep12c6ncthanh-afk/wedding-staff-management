@@ -5,6 +5,7 @@ import {
   getMyReplacementEligibleAssignments,
   getMyReplacementInvitations,
   getMyReplacementRequests,
+  getAiReplacementRecommendation,
   getReplacementCandidates,
   getReplacementRequests,
   inviteReplacementEmployee,
@@ -48,6 +49,9 @@ function ReplacementPage() {
   const [eligibleAssignments, setEligibleAssignments] = useState([]);
   const [candidatesByRequest, setCandidatesByRequest] = useState({});
   const [candidateErrorsByRequest, setCandidateErrorsByRequest] = useState({});
+  const [aiRecommendationsByRequest, setAiRecommendationsByRequest] = useState({});
+  const [aiErrorsByRequest, setAiErrorsByRequest] = useState({});
+  const [aiLoadingByRequest, setAiLoadingByRequest] = useState({});
   const [assignmentId, setAssignmentId] = useState('');
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(true);
@@ -92,6 +96,9 @@ function ReplacementPage() {
             .filter((item) => item.error)
             .map((item) => [item.requestId, item.error]),
         ));
+        setAiRecommendationsByRequest({});
+        setAiErrorsByRequest({});
+        setAiLoadingByRequest({});
       } else {
         const [requestData, invitationData, assignmentData] = await Promise.all([
           getMyReplacementRequests(),
@@ -180,6 +187,28 @@ function ReplacementPage() {
       setError(getApiErrorMessage(err, 'Không thể xử lý yêu cầu thay ca.'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAiRecommendation = async (request) => {
+    try {
+      setAiLoadingByRequest((current) => ({ ...current, [request.id]: true }));
+      setAiErrorsByRequest((current) => ({ ...current, [request.id]: '' }));
+      const result = await getAiReplacementRecommendation(request.id);
+      setAiRecommendationsByRequest((current) => ({
+        ...current,
+        [request.id]: result,
+      }));
+    } catch (err) {
+      setAiErrorsByRequest((current) => ({
+        ...current,
+        [request.id]: getApiErrorMessage(
+          err,
+          'Không thể chạy phân tích AI cho yêu cầu này.',
+        ),
+      }));
+    } finally {
+      setAiLoadingByRequest((current) => ({ ...current, [request.id]: false }));
     }
   };
 
@@ -352,6 +381,9 @@ function ReplacementPage() {
         ) : requests.map((request) => {
           const recommendedCandidates = candidatesByRequest[request.id] || [];
           const candidateError = candidateErrorsByRequest[request.id] || '';
+          const aiRecommendation = aiRecommendationsByRequest[request.id] || null;
+          const aiError = aiErrorsByRequest[request.id] || '';
+          const aiLoading = Boolean(aiLoadingByRequest[request.id]);
 
           return (
             <article className="table-card replacement-request-card" key={request.id}>
@@ -409,11 +441,21 @@ function ReplacementPage() {
                       <div>
                         <strong>Gợi ý ứng viên phù hợp</strong>
                         <span>
-                          Xếp hạng theo quy tắc xác định: uy tín, độ ổn định,
-                          kinh nghiệm và kinh nghiệm đúng vai trò. Không sử dụng AI ở bước này.
+                          Lớp rule-based luôn chạy trước để lọc điều kiện bắt buộc và tạo
+                          điểm nền. AI chỉ phân tích lại các ứng viên đã hợp lệ.
                         </span>
                       </div>
-                      <span className="replacement-rule-badge">Rule-based</span>
+                      <div className="replacement-candidate-heading-actions">
+                        <span className="replacement-rule-badge">Rule-based</span>
+                        <button
+                          type="button"
+                          className="secondary-button replacement-ai-button"
+                          disabled={aiLoading || recommendedCandidates.length === 0 || Boolean(candidateError)}
+                          onClick={() => handleAiRecommendation(request)}
+                        >
+                          {aiLoading ? 'AI đang phân tích...' : 'Phân tích bằng AI'}
+                        </button>
+                      </div>
                     </div>
 
                     {candidateError ? (
@@ -450,7 +492,7 @@ function ReplacementPage() {
                                 </span>
                               </div>
                               <details className="replacement-candidate-reasons">
-                                <summary>Giải thích điểm</summary>
+                                <summary>Giải thích điểm rule-based</summary>
                                 <ul>
                                   {(candidate.reasons || []).map((reasonItem) => (
                                     <li key={reasonItem}>{reasonItem}</li>
@@ -469,6 +511,82 @@ function ReplacementPage() {
                           </article>
                         ))}
                       </div>
+                    )}
+
+                    {aiError && (
+                      <div className="replacement-ai-error">{aiError}</div>
+                    )}
+
+                    {aiRecommendation && (
+                      <section className={`replacement-ai-panel ${aiRecommendation.fallbackUsed ? 'is-fallback' : ''}`}>
+                        <div className="replacement-ai-heading">
+                          <div>
+                            <strong>AI-assisted recommendation</strong>
+                            <span>{aiRecommendation.summary}</span>
+                          </div>
+                          <span className="replacement-ai-badge">
+                            {aiRecommendation.fallbackUsed ? 'Deterministic fallback' : 'AI-assisted'}
+                          </span>
+                        </div>
+
+                        {aiRecommendation.fallbackUsed && (
+                          <div className="replacement-ai-fallback">
+                            AI không được dùng cho kết quả này ({aiRecommendation.fallbackReason}).
+                            Thứ tự bên dưới giữ nguyên theo rule-based.
+                          </div>
+                        )}
+
+                        <div className="replacement-ai-list">
+                          {(aiRecommendation.candidates || []).map((candidate) => (
+                            <article className="replacement-ai-row" key={candidate.employeeId}>
+                              <div className="replacement-ai-rank">AI #{candidate.aiRank}</div>
+                              <div className="replacement-ai-main">
+                                <div className="replacement-ai-name">
+                                  <strong>{candidate.employeeCode} · {candidate.fullName}</strong>
+                                  <span>
+                                    Rule #{candidate.deterministicRank} · {candidate.deterministicScore}/100
+                                  </span>
+                                </div>
+                                <p>{candidate.explanation}</p>
+                                <div className="replacement-ai-columns">
+                                  <div>
+                                    <strong>Điểm mạnh</strong>
+                                    {(candidate.strengths || []).length === 0 ? (
+                                      <span>Không có ghi chú bổ sung.</span>
+                                    ) : (
+                                      <ul>
+                                        {candidate.strengths.map((item, index) => (
+                                          <li key={`${candidate.employeeId}-strength-${index}`}>{item}</li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <strong>Điểm cần lưu ý</strong>
+                                    {(candidate.risks || []).length === 0 ? (
+                                      <span>Chưa ghi nhận rủi ro đáng chú ý.</span>
+                                    ) : (
+                                      <ul>
+                                        {candidate.risks.map((item, index) => (
+                                          <li key={`${candidate.employeeId}-risk-${index}`}>{item}</li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                className="primary-button"
+                                disabled={saving}
+                                onClick={() => handleInvite(request, candidate.employeeId)}
+                              >
+                                Mời thay ca
+                              </button>
+                            </article>
+                          ))}
+                        </div>
+                      </section>
                     )}
                   </div>
                 )}

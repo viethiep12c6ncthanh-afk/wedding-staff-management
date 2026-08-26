@@ -1,6 +1,7 @@
 package com.viethiep.weddingstaff.controller;
 
 import com.viethiep.weddingstaff.dto.*;
+import com.viethiep.weddingstaff.service.AiRecommendationService;
 import com.viethiep.weddingstaff.service.CandidateRecommendationService;
 import com.viethiep.weddingstaff.service.ReplacementService;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import java.util.List;
 public class ReplacementController {
     private final ReplacementService replacementService;
     private final CandidateRecommendationService candidateRecommendationService;
+    private final AiRecommendationService aiRecommendationService;
 
     @GetMapping("/requests")
     @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
@@ -31,6 +33,15 @@ public class ReplacementController {
             @PathVariable Long id
     ) {
         return candidateRecommendationService.findCandidates(id);
+    }
+
+    @PostMapping("/requests/{id}/ai-recommendation")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
+    public AiRecommendationResponse recommendWithAi(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        return aiRecommendationService.recommend(id, authentication.getName());
     }
 
     @GetMapping("/requests/mine")

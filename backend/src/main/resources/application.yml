@@ -28,3 +28,12 @@ app:
     admin-password: "${SEED_ADMIN_PASSWORD:}"
     coordinator-password: "${SEED_COORDINATOR_PASSWORD:}"
     employee-password: "${SEED_EMPLOYEE_PASSWORD:}"
+  ai:
+    enabled: ${AI_ENABLED:false}
+    provider: ${AI_PROVIDER:OPENAI}
+    base-url: "${AI_BASE_URL:https://api.openai.com/v1}"
+    api-key: "${AI_API_KEY:}"
+    model: ${AI_MODEL:gpt-5.4-mini}
+    timeout-ms: ${AI_TIMEOUT_MS:20000}
+    candidate-limit: ${AI_CANDIDATE_LIMIT:5}
+    recent-evaluation-limit: ${AI_RECENT_EVALUATION_LIMIT:3}

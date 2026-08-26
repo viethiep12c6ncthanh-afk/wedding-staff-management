@@ -11,6 +11,11 @@ export const getReplacementCandidates = async (id) => {
   return response.data;
 };
 
+export const getAiReplacementRecommendation = async (id) => {
+  const response = await axiosClient.post(`/replacements/requests/${id}/ai-recommendation`);
+  return response.data;
+};
+
 export const getMyReplacementRequests = async () => {
   const response = await axiosClient.get('/replacements/requests/mine');
   return response.data;
