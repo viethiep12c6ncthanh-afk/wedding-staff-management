@@ -81,7 +81,7 @@ public class AiRecommendationService {
                     deterministicSnapshot,
                     contextSnapshot,
                     "AI_DISABLED_OR_NOT_CONFIGURED",
-                    "AI chưa được bật hoặc chưa cấu hình API key; hệ thống dùng xếp hạng deterministic."
+                    "AI chưa được bật hoặc provider chưa được cấu hình; hệ thống dùng xếp hạng deterministic."
             );
         }
 

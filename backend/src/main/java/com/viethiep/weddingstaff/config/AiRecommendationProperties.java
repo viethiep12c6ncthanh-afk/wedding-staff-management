@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "app.ai")
 public class AiRecommendationProperties {
     private boolean enabled = false;
-    private String provider = "OPENAI";
-    private String baseUrl = "https://api.openai.com/v1";
+    private String provider = "OLLAMA";
+    private String baseUrl = "";
     private String apiKey = "";
-    private String model = "gpt-5.4-mini";
-    private int timeoutMs = 20000;
+    private String model = "";
+    private int timeoutMs = 60000;
     private int candidateLimit = 5;
     private int recentEvaluationLimit = 3;
 }

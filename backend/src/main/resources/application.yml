@@ -30,10 +30,10 @@ app:
     employee-password: "${SEED_EMPLOYEE_PASSWORD:}"
   ai:
     enabled: ${AI_ENABLED:false}
-    provider: ${AI_PROVIDER:OPENAI}
-    base-url: "${AI_BASE_URL:https://api.openai.com/v1}"
+    provider: ${AI_PROVIDER:OLLAMA}
+    base-url: "${AI_BASE_URL:}"
     api-key: "${AI_API_KEY:}"
-    model: ${AI_MODEL:gpt-5.4-mini}
-    timeout-ms: ${AI_TIMEOUT_MS:20000}
+    model: "${AI_MODEL:}"
+    timeout-ms: ${AI_TIMEOUT_MS:60000}
     candidate-limit: ${AI_CANDIDATE_LIMIT:5}
     recent-evaluation-limit: ${AI_RECENT_EVALUATION_LIMIT:3}

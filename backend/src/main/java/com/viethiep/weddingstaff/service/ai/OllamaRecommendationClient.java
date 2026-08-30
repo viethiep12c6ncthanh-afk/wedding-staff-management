@@ -14,15 +14,20 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(
         prefix = "app.ai",
         name = "provider",
-        havingValue = "OPENAI"
+        havingValue = "OLLAMA",
+        matchIfMissing = true
 )
-public class OpenAiRecommendationClient implements AiRecommendationClient {
+public class OllamaRecommendationClient implements AiRecommendationClient {
+    private static final String DEFAULT_BASE_URL = "http://localhost:11434";
+    private static final String DEFAULT_MODEL = "qwen3:4b-instruct";
     private static final String INSTRUCTIONS = """
             Bạn là trợ lý hỗ trợ điều phối nhân sự tiệc cưới/sự kiện.
             Chỉ phân tích các ứng viên hợp lệ mà backend đã cung cấp.
@@ -30,6 +35,8 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
             Hãy sắp xếp lại toàn bộ ứng viên theo mức phù hợp với ngữ cảnh công việc.
             Dùng dữ liệu deterministic làm nền, còn nhận xét đánh giá gần đây chỉ là tín hiệu mềm.
             Không suy đoán thuộc tính cá nhân không có trong dữ liệu.
+            Không sử dụng tuổi, giới tính, địa chỉ nhà hoặc hoàn cảnh cá nhân để xếp hạng.
+            Không tự quyết định phân công hay gửi lời mời thay ca.
             Giải thích ngắn, cụ thể, bằng tiếng Việt và nêu cả điểm mạnh lẫn rủi ro nếu có.
             """;
 
@@ -38,28 +45,26 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
 
     @Override
     public boolean isAvailable() {
-        return properties.isEnabled()
-                && properties.getApiKey() != null
-                && !properties.getApiKey().isBlank();
+        return properties.isEnabled();
     }
 
     @Override
     public String provider() {
-        return "OPENAI";
+        return "OLLAMA";
     }
 
     @Override
     public String model() {
         String configured = properties.getModel();
         return configured == null || configured.isBlank()
-                ? "gpt-5.4-mini"
+                ? DEFAULT_MODEL
                 : configured.trim();
     }
 
     @Override
     public Result recommend(Prompt prompt) {
         if (!isAvailable()) {
-            throw new IllegalStateException("AI provider is not configured");
+            throw new IllegalStateException("AI provider is disabled");
         }
 
         try {
@@ -69,10 +74,9 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
                     .connectTimeout(Duration.ofMillis(timeoutMs))
                     .build();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(normalizeBaseUrl() + "/responses"))
+                    .uri(URI.create(normalizeBaseUrl() + "/api/chat"))
                     .timeout(Duration.ofMillis(timeoutMs))
-                    .header("Authorization", "Bearer " + properties.getApiKey())
-                    .header("Content-Type", "application/json")
+                    .header("Content-Type", "application/json; charset=utf-8")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
@@ -86,26 +90,7 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
                 );
             }
 
-            JsonNode root = objectMapper.readTree(response.body());
-            if (!"completed".equals(root.path("status").asText())) {
-                throw new IllegalStateException("AI response was not completed");
-            }
-
-            String outputText = extractOutputText(root);
-            JsonNode structured = objectMapper.readTree(outputText);
-            String summary = structured.path("summary").asText(null);
-            var candidates = new java.util.ArrayList<CandidateAnalysis>();
-            for (JsonNode item : structured.path("candidates")) {
-                candidates.add(new CandidateAnalysis(
-                        item.path("employeeId").isIntegralNumber()
-                                ? item.path("employeeId").longValue()
-                                : null,
-                        item.path("explanation").asText(null),
-                        toStringList(item.path("strengths")),
-                        toStringList(item.path("risks"))
-                ));
-            }
-            return new Result(outputText, summary, candidates);
+            return parseResponse(response.body());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("AI request was interrupted", ex);
@@ -117,20 +102,52 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
         }
     }
 
-    private String buildRequestBody(Prompt prompt) throws Exception {
+    String buildRequestBody(Prompt prompt) throws Exception {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("model", model());
-        root.put("store", false);
-        root.put("instructions", INSTRUCTIONS);
-        root.put("input", prompt.contextJson());
+        root.put("stream", false);
+        root.put("keep_alive", "5m");
 
-        ObjectNode text = root.putObject("text");
-        ObjectNode format = text.putObject("format");
-        format.put("type", "json_schema");
-        format.put("name", "replacement_staff_recommendation");
-        format.put("strict", true);
-        format.set("schema", buildSchema());
+        ArrayNode messages = root.putArray("messages");
+        ObjectNode system = messages.addObject();
+        system.put("role", "system");
+        system.put("content", INSTRUCTIONS);
+        ObjectNode user = messages.addObject();
+        user.put("role", "user");
+        user.put("content", prompt.contextJson());
+
+        root.set("format", buildSchema());
+        ObjectNode options = root.putObject("options");
+        options.put("temperature", 0);
+        options.put("num_predict", 768);
         return objectMapper.writeValueAsString(root);
+    }
+
+    Result parseResponse(String responseBody) throws Exception {
+        JsonNode root = objectMapper.readTree(responseBody);
+        if (!root.path("done").asBoolean(false)) {
+            throw new IllegalStateException("AI response was not completed");
+        }
+
+        String outputText = root.path("message").path("content").asText(null);
+        if (outputText == null || outputText.isBlank()) {
+            throw new IllegalStateException("AI response did not contain message.content");
+        }
+
+        JsonNode structured = objectMapper.readTree(outputText);
+        String summary = structured.path("summary").asText(null);
+        List<CandidateAnalysis> candidates = new ArrayList<>();
+        for (JsonNode item : structured.path("candidates")) {
+            candidates.add(new CandidateAnalysis(
+                    item.path("employeeId").isIntegralNumber()
+                            ? item.path("employeeId").longValue()
+                            : null,
+                    item.path("explanation").asText(null),
+                    toStringList(item.path("strengths")),
+                    toStringList(item.path("risks"))
+            ));
+        }
+        return new Result(outputText, summary, candidates);
     }
 
     private ObjectNode buildSchema() {
@@ -166,25 +183,8 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
         return schema;
     }
 
-    private String extractOutputText(JsonNode root) {
-        for (JsonNode output : root.path("output")) {
-            if (!"message".equals(output.path("type").asText())) {
-                continue;
-            }
-            for (JsonNode content : output.path("content")) {
-                if ("output_text".equals(content.path("type").asText())) {
-                    String text = content.path("text").asText(null);
-                    if (text != null && !text.isBlank()) {
-                        return text;
-                    }
-                }
-            }
-        }
-        throw new IllegalStateException("AI response did not contain output_text");
-    }
-
-    private java.util.List<String> toStringList(JsonNode node) {
-        java.util.List<String> result = new java.util.ArrayList<>();
+    private List<String> toStringList(JsonNode node) {
+        List<String> result = new ArrayList<>();
         if (!node.isArray()) {
             return result;
         }
@@ -199,10 +199,11 @@ public class OpenAiRecommendationClient implements AiRecommendationClient {
     private String normalizeBaseUrl() {
         String value = properties.getBaseUrl();
         if (value == null || value.isBlank()) {
-            return "https://api.openai.com/v1";
+            return DEFAULT_BASE_URL;
         }
-        return value.endsWith("/")
-                ? value.substring(0, value.length() - 1)
-                : value;
+        String trimmed = value.trim();
+        return trimmed.endsWith("/")
+                ? trimmed.substring(0, trimmed.length() - 1)
+                : trimmed;
     }
 }
