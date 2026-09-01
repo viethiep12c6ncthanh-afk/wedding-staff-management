@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,8 @@ class ReplacementServiceTest {
     private UserAccount managerUser;
     private Employee originalEmployee;
     private WorkShift shift;
+    private ShiftArea originalArea;
+    private ShiftTable originalTable;
     private ShiftAssignment originalAssignment;
 
     @BeforeEach
@@ -84,13 +87,27 @@ class ReplacementServiceTest {
                 .employmentStatus(EmployeeStatus.ACTIVE)
                 .employeeCode("NV020")
                 .build();
+        originalArea = ShiftArea.builder()
+                .id(80L)
+                .shift(shift)
+                .name("Sảnh A")
+                .requiredStaff(2)
+                .areaStatus(CommonStatus.ACTIVE)
+                .build();
+        originalTable = ShiftTable.builder()
+                .id(81L)
+                .area(originalArea)
+                .tableCode("A01")
+                .tableStatus(CommonStatus.ACTIVE)
+                .build();
         originalAssignment = ShiftAssignment.builder()
                 .id(30L)
                 .shift(shift)
                 .employee(originalEmployee)
                 .assignmentSource(AssignmentSource.DIRECT)
                 .shiftRole(ShiftRole.LEADER)
-                .area("Sảnh A")
+                .shiftArea(originalArea)
+                .tables(new LinkedHashSet<>(List.of(originalTable)))
                 .task("Điều phối bàn")
                 .status(AssignmentStatus.ASSIGNED)
                 .assignedBy(managerUser)
@@ -298,7 +315,8 @@ class ReplacementServiceTest {
 
         assertEquals(AssignmentSource.REPLACEMENT, replacement.getAssignmentSource());
         assertEquals(ShiftRole.LEADER, replacement.getShiftRole());
-        assertEquals("Sảnh A", replacement.getArea());
+        assertEquals(originalArea, replacement.getShiftArea());
+        assertEquals(List.of(originalTable), replacement.getTables().stream().toList());
         assertEquals("Điều phối bàn", replacement.getTask());
         assertEquals(candidate, replacement.getEmployee());
         assertEquals(ReplacementInvitationStatus.ACCEPTED, response.status());

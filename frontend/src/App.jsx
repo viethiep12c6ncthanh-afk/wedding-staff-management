@@ -18,6 +18,7 @@ import EventsPage from './pages/events/EventsPage';
 import ShiftsPage from './pages/shifts/ShiftsPage';
 import RegistrationsPage from './pages/registrations/RegistrationsPage';
 import AssignmentsPage from './pages/assignments/AssignmentsPage';
+import MyAssignmentsPage from './pages/assignments/MyAssignmentsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import ReputationPage from './pages/reputation/ReputationPage';
@@ -81,6 +82,19 @@ function App() {
               <Route
                 path="/assignments"
                 element={<AssignmentsPage />}
+              />
+            </Route>
+
+            <Route
+              element={
+                <RoleRoute
+                  allowedRoles={['EMPLOYEE']}
+                />
+              }
+            >
+              <Route
+                path="/my-assignments"
+                element={<MyAssignmentsPage />}
               />
             </Route>
 

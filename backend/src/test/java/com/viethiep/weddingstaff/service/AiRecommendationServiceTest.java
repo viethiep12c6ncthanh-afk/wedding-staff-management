@@ -97,12 +97,18 @@ class AiRecommendationServiceTest {
                 .accountStatus(AccountStatus.ACTIVE)
                 .build();
         Employee originalEmployee = employee(20L, "NV020");
+        ShiftArea area = ShiftArea.builder()
+                .id(5L)
+                .shift(shift)
+                .name("VIP")
+                .areaStatus(CommonStatus.ACTIVE)
+                .build();
         ShiftAssignment originalAssignment = ShiftAssignment.builder()
                 .id(30L)
                 .shift(shift)
                 .employee(originalEmployee)
                 .shiftRole(ShiftRole.STAFF)
-                .area("VIP")
+                .shiftArea(area)
                 .task("Phục vụ bàn")
                 .assignmentSource(AssignmentSource.DIRECT)
                 .status(AssignmentStatus.CANCELLED)

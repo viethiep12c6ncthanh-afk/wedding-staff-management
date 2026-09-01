@@ -8,7 +8,6 @@ public record ReviewRegistrationRequest(
         @NotNull Boolean approved,
         @Size(max = 500) String rejectionReason,
         ShiftRole shiftRole,
-        @Size(max = 100) String area,
         @Size(max = 300) String task
 ) {
 }

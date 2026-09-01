@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -257,7 +258,8 @@ public class ReplacementService {
                 .registration(null)
                 .assignmentSource(AssignmentSource.REPLACEMENT)
                 .shiftRole(original.getShiftRole())
-                .area(original.getArea())
+                .shiftArea(original.getShiftArea())
+                .tables(new LinkedHashSet<>(original.getTables()))
                 .task(original.getTask())
                 .status(AssignmentStatus.ASSIGNED)
                 .assignedBy(invitation.getInvitedBy())
@@ -451,7 +453,9 @@ public class ReplacementService {
                 shift.getStartAt(),
                 shift.getEndAt(),
                 assignment.getShiftRole(),
-                assignment.getArea(),
+                assignment.getShiftArea() == null
+                        ? null
+                        : assignment.getShiftArea().getName(),
                 assignment.getTask(),
                 assignment.getStatus()
         );

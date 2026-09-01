@@ -5,6 +5,7 @@ import com.viethiep.weddingstaff.enumtype.AssignmentStatus;
 import com.viethiep.weddingstaff.enumtype.ShiftRole;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record AssignmentResponse(
         Long id,
@@ -16,6 +17,9 @@ public record AssignmentResponse(
         AssignmentSource assignmentSource,
         ShiftRole shiftRole,
         String area,
+        Long areaId,
+        List<Long> tableIds,
+        List<String> tableCodes,
         String task,
         AssignmentStatus status,
         String assignedBy,

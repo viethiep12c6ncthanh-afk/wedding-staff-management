@@ -55,7 +55,6 @@ class DtoValidationTest {
                 1L,
                 -1L,
                 ShiftRole.STAFF,
-                null,
                 null
         );
 

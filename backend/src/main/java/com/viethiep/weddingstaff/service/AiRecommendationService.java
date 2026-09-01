@@ -238,7 +238,21 @@ public class AiRecommendationService {
         ));
         context.put("jobContext", Map.ofEntries(
                 Map.entry("shiftRole", original.getShiftRole().name()),
-                Map.entry("area", nullable(original.getArea())),
+                Map.entry(
+                        "area",
+                        nullable(
+                                original.getShiftArea() == null
+                                        ? null
+                                        : original.getShiftArea().getName()
+                        )
+                ),
+                Map.entry(
+                        "tables",
+                        original.getTables().stream()
+                                .map(ShiftTable::getTableCode)
+                                .sorted(String.CASE_INSENSITIVE_ORDER)
+                                .toList()
+                ),
                 Map.entry("task", nullable(original.getTask())),
                 Map.entry("shiftName", shift.getName()),
                 Map.entry("shiftStartAt", shift.getStartAt().toString()),

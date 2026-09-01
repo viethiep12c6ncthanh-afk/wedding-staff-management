@@ -143,7 +143,6 @@ public class RegistrationService {
                     .registration(registration)
                     .assignmentSource(AssignmentSource.REGISTRATION)
                     .shiftRole(shiftRole)
-                    .area(request.area())
                     .task(request.task())
                     .status(AssignmentStatus.ASSIGNED)
                     .assignedBy(reviewer)

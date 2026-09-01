@@ -7,6 +7,7 @@ import {
 } from '../../api/assignmentApi';
 import { getEmployees } from '../../api/employeeApi';
 import { getShifts } from '../../api/shiftApi';
+import AreaTableManager from '../../components/assignments/AreaTableManager';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -16,7 +17,6 @@ const emptyForm = {
   shiftId: '',
   employeeId: '',
   shiftRole: 'STAFF',
-  area: '',
   task: '',
 };
 
@@ -88,6 +88,7 @@ function AssignmentsPage() {
           assignment.shiftName,
           assignment.employeeName,
           assignment.area,
+          ...(assignment.tableCodes || []),
           assignment.task,
         ]
           .filter(Boolean)
@@ -123,13 +124,14 @@ function AssignmentsPage() {
         shiftId: Number(form.shiftId),
         employeeId: Number(form.employeeId),
         shiftRole: form.shiftRole,
-        area: form.area || null,
         task: form.task || null,
       });
 
       setModalOpen(false);
       setForm(emptyForm);
-      setNotice('Đã phân công trực tiếp nhân viên vào ca.');
+      setNotice(
+        'Đã phân công trực tiếp. Có thể phân khu vực/bàn ở bảng điều phối bên dưới.',
+      );
       await loadData();
     } catch (err) {
       setError(
@@ -175,7 +177,8 @@ function AssignmentsPage() {
         <div>
           <h1>Phân công</h1>
           <p>
-            Theo dõi nhân sự trong ca và phân công trực tiếp khi cần.
+            Theo dõi nhân sự, cấu hình khu vực/bàn và điều phối
+            vị trí làm việc trong từng ca.
           </p>
         </div>
 
@@ -194,7 +197,7 @@ function AssignmentsPage() {
           type="search"
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Tìm ca, nhân viên, khu vực..."
+          placeholder="Tìm ca, nhân viên, khu vực, bàn..."
         />
 
         <select
@@ -214,6 +217,14 @@ function AssignmentsPage() {
       {notice && <div className="notice-box">{notice}</div>}
       {error && <div className="error-box">{error}</div>}
 
+      <AreaTableManager
+        shifts={shifts}
+        assignments={assignments}
+        onChanged={loadData}
+      />
+
+      <h2 className="section-title">Danh sách phân công</h2>
+
       <div className="table-card">
         {loading ? (
           <div className="table-state">Đang tải phân công...</div>
@@ -226,7 +237,7 @@ function AssignmentsPage() {
                   <th>Nhân viên</th>
                   <th>Nguồn</th>
                   <th>Vai trò</th>
-                  <th>Khu vực / nhiệm vụ</th>
+                  <th>Khu vực / bàn / nhiệm vụ</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
                 </tr>
@@ -268,9 +279,17 @@ function AssignmentsPage() {
                       </td>
 
                       <td>
-                        <div>{assignment.area || '—'}</div>
+                        <div>
+                          {assignment.area || 'Chưa phân khu vực'}
+                        </div>
                         <div className="cell-subtitle">
-                          {assignment.task || 'Không có nhiệm vụ riêng'}
+                          {(assignment.tableCodes || []).length > 0
+                            ? `Bàn: ${assignment.tableCodes.join(', ')}`
+                            : 'Chưa phân bàn'}
+                        </div>
+                        <div className="cell-subtitle">
+                          {assignment.task ||
+                            'Không có nhiệm vụ riêng'}
                         </div>
                       </td>
 
@@ -387,16 +406,6 @@ function AssignmentsPage() {
             </select>
           </label>
 
-          <label>
-            Khu vực
-            <input
-              name="area"
-              value={form.area}
-              onChange={handleChange}
-              maxLength="100"
-            />
-          </label>
-
           <label className="form-span-2">
             Nhiệm vụ
             <textarea
@@ -405,6 +414,7 @@ function AssignmentsPage() {
               onChange={handleChange}
               maxLength="300"
               rows="3"
+              placeholder="Có thể bổ sung khu vực/bàn sau khi tạo phân công."
             />
           </label>
         </form>

@@ -29,7 +29,6 @@ public interface ShiftAssignmentRepository
             Collection<AssignmentStatus> statuses
     );
 
-
     long countByEmployeeIdAndStatus(
             Long employeeId,
             AssignmentStatus status
@@ -45,6 +44,31 @@ public interface ShiftAssignmentRepository
             Long shiftId,
             Long employeeId,
             Collection<AssignmentStatus> statuses
+    );
+
+    @Query("""
+            select count(assignment)
+            from ShiftAssignment assignment
+            where assignment.shiftArea.id = :areaId
+              and assignment.status in :statuses
+              and (:excludeAssignmentId is null or assignment.id <> :excludeAssignmentId)
+            """)
+    long countActiveByArea(
+            @Param("areaId") Long areaId,
+            @Param("statuses") Collection<AssignmentStatus> statuses,
+            @Param("excludeAssignmentId") Long excludeAssignmentId
+    );
+
+    @Query("""
+            select count(distinct assignment)
+            from ShiftAssignment assignment
+            join assignment.tables tableItem
+            where tableItem.id = :tableId
+              and assignment.status in :statuses
+            """)
+    long countActiveByTable(
+            @Param("tableId") Long tableId,
+            @Param("statuses") Collection<AssignmentStatus> statuses
     );
 
     @Query("""
@@ -100,7 +124,7 @@ public interface ShiftAssignmentRepository
     );
 
     @Query("""
-            select assignment
+            select distinct assignment
             from ShiftAssignment assignment
             join fetch assignment.shift shift
             join fetch shift.event event
@@ -109,10 +133,30 @@ public interface ShiftAssignmentRepository
             join fetch employee.user
             join fetch assignment.assignedBy
             left join fetch assignment.registration
+            left join fetch assignment.shiftArea
+            left join fetch assignment.tables
             order by assignment.createdAt desc
             """)
     List<ShiftAssignment> findAllWithDetails();
 
+    @Query("""
+            select distinct assignment
+            from ShiftAssignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user user
+            join fetch assignment.assignedBy
+            left join fetch assignment.registration
+            left join fetch assignment.shiftArea
+            left join fetch assignment.tables
+            where user.username = :username
+            order by shift.startAt desc, assignment.id desc
+            """)
+    List<ShiftAssignment> findAllByEmployeeUsernameWithDetails(
+            @Param("username") String username
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

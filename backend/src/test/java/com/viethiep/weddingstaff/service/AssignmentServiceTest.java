@@ -65,7 +65,6 @@ class AssignmentServiceTest {
                 3L,
                 2L,
                 ShiftRole.STAFF,
-                "Sảnh chính",
                 "Phục vụ"
         );
 

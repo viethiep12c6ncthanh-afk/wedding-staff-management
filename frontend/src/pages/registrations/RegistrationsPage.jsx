@@ -41,7 +41,6 @@ function RegistrationsPage() {
   const [reviewForm, setReviewForm] = useState({
     approved: true,
     shiftRole: 'STAFF',
-    area: '',
     task: '',
     rejectionReason: '',
   });
@@ -170,8 +169,7 @@ function RegistrationsPage() {
     setReviewForm({
       approved: true,
       shiftRole: 'STAFF',
-      area: '',
-      task: '',
+        task: '',
       rejectionReason: '',
     });
   };
@@ -201,14 +199,12 @@ function RegistrationsPage() {
             approved: true,
             rejectionReason: null,
             shiftRole: reviewForm.shiftRole,
-            area: reviewForm.area || null,
             task: reviewForm.task || null,
           }
         : {
             approved: false,
             rejectionReason: reviewForm.rejectionReason,
             shiftRole: null,
-            area: null,
             task: null,
           };
 
@@ -482,16 +478,6 @@ function RegistrationsPage() {
                   <option value="STAFF">Nhân viên</option>
                   <option value="LEADER">Trưởng ca</option>
                 </select>
-              </label>
-
-              <label>
-                Khu vực
-                <input
-                  name="area"
-                  value={reviewForm.area}
-                  onChange={handleReviewChange}
-                  maxLength="100"
-                />
               </label>
 
               <label>

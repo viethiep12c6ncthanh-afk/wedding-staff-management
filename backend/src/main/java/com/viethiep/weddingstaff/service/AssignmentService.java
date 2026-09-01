@@ -6,6 +6,7 @@ import com.viethiep.weddingstaff.dto.CancellationRequest;
 import com.viethiep.weddingstaff.dto.DirectAssignmentRequest;
 import com.viethiep.weddingstaff.entity.Employee;
 import com.viethiep.weddingstaff.entity.ShiftAssignment;
+import com.viethiep.weddingstaff.entity.ShiftTable;
 import com.viethiep.weddingstaff.entity.UserAccount;
 import com.viethiep.weddingstaff.entity.WorkShift;
 import com.viethiep.weddingstaff.enumtype.AssignmentSource;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -38,6 +40,15 @@ public class AssignmentService {
     @Transactional(readOnly = true)
     public List<AssignmentResponse> findAll() {
         return assignmentRepository.findAllWithDetails().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AssignmentResponse> findMine(String username) {
+        return assignmentRepository
+                .findAllByEmployeeUsernameWithDetails(username)
+                .stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -81,7 +92,6 @@ public class AssignmentService {
                 .registration(null)
                 .assignmentSource(AssignmentSource.DIRECT)
                 .shiftRole(request.shiftRole())
-                .area(request.area())
                 .task(request.task())
                 .status(AssignmentStatus.ASSIGNED)
                 .assignedBy(assigner)
@@ -194,6 +204,13 @@ public class AssignmentService {
     }
 
     private AssignmentResponse toResponse(ShiftAssignment assignment) {
+        List<ShiftTable> tables = assignment.getTables().stream()
+                .sorted(Comparator.comparing(
+                        ShiftTable::getTableCode,
+                        String.CASE_INSENSITIVE_ORDER
+                ))
+                .toList();
+
         return new AssignmentResponse(
                 assignment.getId(),
                 assignment.getShift().getId(),
@@ -205,7 +222,14 @@ public class AssignmentService {
                         : assignment.getRegistration().getId(),
                 assignment.getAssignmentSource(),
                 assignment.getShiftRole(),
-                assignment.getArea(),
+                assignment.getShiftArea() == null
+                        ? null
+                        : assignment.getShiftArea().getName(),
+                assignment.getShiftArea() == null
+                        ? null
+                        : assignment.getShiftArea().getId(),
+                tables.stream().map(ShiftTable::getId).toList(),
+                tables.stream().map(ShiftTable::getTableCode).toList(),
                 assignment.getTask(),
                 assignment.getStatus(),
                 assignment.getAssignedBy().getUsername(),

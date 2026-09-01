@@ -17,6 +17,7 @@ const managementItems = [
 
 const employeeItems = [
   { path: '/registrations', label: 'Đăng ký ca' },
+  { path: '/my-assignments', label: 'Phân công của tôi' },
   { path: '/replacements', label: 'Yêu cầu thay ca' },
   { path: '/attendance', label: 'Chấm công của tôi' },
   { path: '/reputation', label: 'Uy tín của tôi' },
