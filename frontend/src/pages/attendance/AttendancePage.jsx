@@ -8,6 +8,8 @@ import {
   getMyAttendances,
   updateAttendance,
 } from '../../api/attendanceApi';
+import EmployeeSelfAttendance from '../../components/attendance/EmployeeSelfAttendance';
+import QrSessionManager from '../../components/attendance/QrSessionManager';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -232,6 +234,12 @@ function AttendancePage() {
 
       {notice && <div className="notice-box">{notice}</div>}
       {error && <div className="error-box">{error}</div>}
+
+      {isManager ? (
+        <QrSessionManager />
+      ) : (
+        <EmployeeSelfAttendance onCompleted={loadData} />
+      )}
 
       <div className="table-card">
         {loading ? (
