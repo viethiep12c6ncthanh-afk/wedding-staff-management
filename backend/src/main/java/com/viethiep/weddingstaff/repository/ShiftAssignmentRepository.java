@@ -113,6 +113,28 @@ public interface ShiftAssignmentRepository
             """)
     List<ShiftAssignment> findAllWithDetails();
 
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select assignment
+            from ShiftAssignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user user
+            join fetch assignment.assignedBy
+            left join fetch assignment.registration
+            where shift.id = :shiftId
+              and user.username = :username
+              and assignment.status in :statuses
+            """)
+    Optional<ShiftAssignment> findOwnedActiveForUpdate(
+            @Param("shiftId") Long shiftId,
+            @Param("username") String username,
+            @Param("statuses") Collection<AssignmentStatus> statuses
+    );
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select assignment
