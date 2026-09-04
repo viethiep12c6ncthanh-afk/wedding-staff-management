@@ -1,0 +1,509 @@
+{
+  "info": {
+    "name": "Wedding Staff Management — DACN v1",
+    "_postman_id": "8c742f9f-dacn-4f18-9a33-weddingstaffv1",
+    "description": "Demo/release collection. No real credentials or secrets are embedded. Set collection variables locally.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "adminUsername",
+      "value": "admin"
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "employeeUsername",
+      "value": ""
+    },
+    {
+      "key": "employeePassword",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    },
+    {
+      "key": "from",
+      "value": "2026-09-01"
+    },
+    {
+      "key": "to",
+      "value": "2026-09-30"
+    },
+    {
+      "key": "requestId",
+      "value": "1"
+    },
+    {
+      "key": "shiftId",
+      "value": "1"
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "qrToken",
+      "value": ""
+    },
+    {
+      "key": "otp",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"{{adminUsername}}\",\"password\":\"{{adminPassword}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set(\"adminToken\", json.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Employee login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"{{employeeUsername}}\",\"password\":\"{{employeePassword}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set(\"employeeToken\", json.token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Reports",
+      "item": [
+        {
+          "name": "Dashboard summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/summary",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Operations analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/operations?from={{from}}&to={{to}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Workforce analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/workforce?from={{from}}&to={{to}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/ai?from={{from}}&to={{to}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payroll report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reports/payroll?from={{from}}&to={{to}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Replacement Recommendation",
+      "item": [
+        {
+          "name": "Deterministic candidates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/replacements/requests/{{requestId}}/candidates",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI-assisted recommendation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/replacements/requests/{{requestId}}/ai-recommendation",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "QR / OTP Attendance",
+      "item": [
+        {
+          "name": "Create CHECK_IN session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/qr-attendance/sessions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shiftId\":{{shiftId}},\"action\":\"CHECK_IN\",\"validMinutes\":10,\"latitude\":null,\"longitude\":null,\"radiusMeters\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"2xx\", () => pm.expect(pm.response.code).to.be.within(200, 299));",
+                  "const json = pm.response.json();",
+                  "if (json.sessionId) pm.collectionVariables.set(\"sessionId\", json.sessionId);",
+                  "if (json.qrToken) pm.collectionVariables.set(\"qrToken\", json.qrToken);",
+                  "if (json.otp) pm.collectionVariables.set(\"otp\", json.otp);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Employee QR check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/qr-attendance/check-in",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employeeToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shiftId\":{{shiftId}},\"qrToken\":\"{{qrToken}}\",\"otp\":null,\"latitude\":null,\"longitude\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Employee OTP check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/qr-attendance/check-in",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employeeToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shiftId\":{{shiftId}},\"qrToken\":null,\"otp\":\"{{otp}}\",\"latitude\":null,\"longitude\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Revoke session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/qr-attendance/sessions/{{sessionId}}/revoke",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security Smoke",
+      "item": [
+        {
+          "name": "Protected API without JWT -> 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/summary"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "ADMIN employee-only -> 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/assignments/mine",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "One-sided GPS -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/qr-attendance/sessions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"shiftId\":{{shiftId}},\"action\":\"CHECK_IN\",\"validMinutes\":10,\"latitude\":10.7769,\"longitude\":null,\"radiusMeters\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

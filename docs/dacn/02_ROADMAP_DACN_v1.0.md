@@ -1,5 +1,12 @@
 # DACN Roadmap v1.0
 
+
+> **Release note (DACN v1.0):** Đây là tài liệu kế hoạch ban đầu và được giữ lại để truy vết quyết định.
+> Quá trình triển khai thực tế tách thêm các milestone riêng cho Area/Table Assignment,
+> Multi-rule Payroll, Advanced Dashboard/Reports và UI/UX Polish, nên lịch sử Git cuối cùng
+> có nhiều milestone commit hơn kế hoạch 12 bước ban đầu. Trạng thái release thực tế được
+> tổng hợp trong `14_RELEASE_DEMO_DACN_v1.0.md`.
+
 ## Goal
 
 Develop DACN from the immutable DACS baseline into a strong software-engineering student project with one clear AI use case, end-to-end workflows, testability, explainability and portfolio value.
