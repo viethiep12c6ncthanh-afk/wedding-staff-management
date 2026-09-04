@@ -11,18 +11,25 @@ import MainLayout from './layouts/MainLayout';
 
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import CoordinationPage from './pages/coordination/CoordinationPage';
 import EmployeesPage from './pages/employees/EmployeesPage';
 import VenuesPage from './pages/venues/VenuesPage';
 import EventsPage from './pages/events/EventsPage';
 import ShiftsPage from './pages/shifts/ShiftsPage';
 import RegistrationsPage from './pages/registrations/RegistrationsPage';
 import AssignmentsPage from './pages/assignments/AssignmentsPage';
+import MyAssignmentsPage from './pages/assignments/MyAssignmentsPage';
 import AttendancePage from './pages/attendance/AttendancePage';
 import ReportsPage from './pages/reports/ReportsPage';
+import ReputationPage from './pages/reputation/ReputationPage';
+import ReplacementPage from './pages/replacements/ReplacementPage';
 
 import './styles/crud.css';
+import './styles/coordination.css';
 import './styles/workflow.css';
 import './styles/report.css';
+import './styles/reputation.css';
+import './styles/replacement.css';
 
 function App() {
   return (
@@ -45,6 +52,11 @@ function App() {
               <Route
                 path="/dashboard"
                 element={<DashboardPage />}
+              />
+
+              <Route
+                path="/coordination"
+                element={<CoordinationPage />}
               />
 
               <Route
@@ -74,6 +86,19 @@ function App() {
             </Route>
 
             <Route
+              element={
+                <RoleRoute
+                  allowedRoles={['EMPLOYEE']}
+                />
+              }
+            >
+              <Route
+                path="/my-assignments"
+                element={<MyAssignmentsPage />}
+              />
+            </Route>
+
+            <Route
               path="/registrations"
               element={<RegistrationsPage />}
             />
@@ -81,6 +106,16 @@ function App() {
             <Route
               path="/attendance"
               element={<AttendancePage />}
+            />
+
+            <Route
+              path="/reputation"
+              element={<ReputationPage />}
+            />
+
+            <Route
+              path="/replacements"
+              element={<ReplacementPage />}
             />
 
             <Route

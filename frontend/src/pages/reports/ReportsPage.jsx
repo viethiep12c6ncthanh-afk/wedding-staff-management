@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   getMyPayrollReport,
@@ -114,14 +114,10 @@ function ReportsPage() {
     setAppliedFilters(empty);
   };
 
-  const totalDifference = useMemo(() => {
-    const base = Number(report?.totalBasePay ?? 0);
-    const payable = Number(report?.totalPayable ?? 0);
-
-    return Math.max(base - payable, 0);
-  }, [report]);
-
   const employeeRows = report?.employees ?? [];
+  const totalDeductions =
+    Number(report?.totalLateDeduction ?? 0) +
+    Number(report?.totalEarlyLeaveDeduction ?? 0);
 
   return (
     <section>
@@ -188,6 +184,7 @@ function ReportsPage() {
       <div className="report-note">
         Báo cáo chỉ tính các bản chấm công đã xác nhận.
         Khoảng ngày được lọc theo ngày bắt đầu ca làm.
+        Dữ liệu cũ giữ nguyên chính sách tiền công đã chốt trước Commit 10.
       </div>
 
       {error && <div className="error-box">{error}</div>}
@@ -220,19 +217,37 @@ function ReportsPage() {
             <PayrollStatCard
               label="Tiền công cơ bản"
               value={formatMoney(report.totalBasePay)}
-              detail="Tổng basePaySnapshot"
+              detail="Snapshot mức công của ca"
+            />
+
+            <PayrollStatCard
+              label="Phụ cấp trưởng ca"
+              value={formatMoney(report.totalLeaderAllowance)}
+              detail="10% tiền công cơ bản"
+            />
+
+            <PayrollStatCard
+              label="Tiền tăng ca"
+              value={formatMoney(report.totalOvertimePay)}
+              detail="Theo phút vượt giờ, hệ số 1.5"
+            />
+
+            <PayrollStatCard
+              label="Khấu trừ đi trễ"
+              value={formatMoney(report.totalLateDeduction)}
+              detail="Theo tỷ lệ số phút trễ"
+            />
+
+            <PayrollStatCard
+              label="Khấu trừ về sớm"
+              value={formatMoney(report.totalEarlyLeaveDeduction)}
+              detail={`Tổng khấu trừ: ${formatMoney(totalDeductions)}`}
             />
 
             <PayrollStatCard
               label="Tiền thực trả"
               value={formatMoney(report.totalPayable)}
-              detail="Tổng payableAmount"
-            />
-
-            <PayrollStatCard
-              label="Chênh lệch"
-              value={formatMoney(totalDifference)}
-              detail="Cơ bản trừ thực trả"
+              detail="Tổng thực trả từ các bản chấm công đã xác nhận"
             />
           </div>
 
@@ -254,6 +269,10 @@ function ReportsPage() {
                     <th>Ca có trả công</th>
                     <th>Ca vắng</th>
                     <th>Tiền cơ bản</th>
+                    <th>Phụ cấp trưởng ca</th>
+                    <th>Tăng ca</th>
+                    <th>Trừ đi trễ</th>
+                    <th>Trừ về sớm</th>
                     <th>Thực trả</th>
                   </tr>
                 </thead>
@@ -262,7 +281,7 @@ function ReportsPage() {
                   {employeeRows.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={isEmployee ? 6 : 7}
+                        colSpan={isEmployee ? 10 : 11}
                         className="empty-cell"
                       >
                         Không có dữ liệu tiền công trong khoảng đã chọn.
@@ -294,10 +313,11 @@ function ReportsPage() {
                         <td>{employee.confirmedShiftCount}</td>
                         <td>{employee.paidShiftCount}</td>
                         <td>{employee.absentShiftCount}</td>
-
-                        <td>
-                          {formatMoney(employee.totalBasePay)}
-                        </td>
+                        <td>{formatMoney(employee.totalBasePay)}</td>
+                        <td>{formatMoney(employee.totalLeaderAllowance)}</td>
+                        <td>{formatMoney(employee.totalOvertimePay)}</td>
+                        <td>{formatMoney(employee.totalLateDeduction)}</td>
+                        <td>{formatMoney(employee.totalEarlyLeaveDeduction)}</td>
 
                         <td>
                           <strong className="payable-money">

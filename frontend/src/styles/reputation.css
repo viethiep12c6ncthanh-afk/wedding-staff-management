@@ -1,0 +1,360 @@
+.reputation-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reputation-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.reputation-layout.single {
+  grid-template-columns: minmax(0, 900px);
+}
+
+.reputation-list-card {
+  position: sticky;
+  top: 18px;
+  max-height: calc(100vh - 130px);
+  overflow: hidden;
+}
+
+.reputation-card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.reputation-card-heading strong {
+  display: block;
+  color: #172033;
+  font-size: 14px;
+}
+
+.reputation-card-heading span {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.reputation-list {
+  max-height: calc(100vh - 210px);
+  overflow-y: auto;
+}
+
+.reputation-list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  border: 0;
+  border-bottom: 1px solid #eef2f7;
+  background: #ffffff;
+  color: #172033;
+  text-align: left;
+}
+
+.reputation-list-item:hover,
+.reputation-list-item.active {
+  background: #f8fafc;
+}
+
+.reputation-list-item.active {
+  box-shadow: inset 3px 0 0 #334155;
+}
+
+.reputation-list-item strong,
+.reputation-list-item span {
+  display: block;
+}
+
+.reputation-list-item span {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.reputation-list-score {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.reputation-list-score small {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.reputation-detail-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.reputation-score-card {
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.reputation-person {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.reputation-person h2 {
+  margin: 4px 0;
+  color: #111827;
+  font-size: 22px;
+}
+
+.reputation-person p,
+.reputation-eyebrow {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.reputation-eyebrow {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.reputation-score-value {
+  display: flex;
+  align-items: baseline;
+  color: #111827;
+}
+
+.reputation-score-value strong {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.reputation-score-value span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.reputation-progress {
+  height: 8px;
+  margin: 18px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.reputation-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #334155;
+}
+
+.reputation-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.reputation-metric {
+  padding: 11px 12px;
+  border: 1px solid #eef2f7;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.reputation-metric span,
+.reputation-metric strong {
+  display: block;
+}
+
+.reputation-metric span {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.reputation-metric strong {
+  margin-top: 4px;
+  color: #172033;
+  font-size: 17px;
+}
+
+.reputation-evaluation-card {
+  padding-bottom: 16px;
+}
+
+.reputation-form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  padding: 16px 18px 0;
+}
+
+.reputation-form-grid label,
+.reputation-comment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.reputation-form-grid select,
+.reputation-comment-field textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+  font-weight: 400;
+}
+
+.reputation-comment-field {
+  padding: 12px 18px 0;
+}
+
+.reputation-comment-field textarea {
+  resize: vertical;
+}
+
+.reputation-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 0;
+}
+
+.reputation-form-actions > span {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.reputation-history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.reputation-history-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.reputation-history-item:last-child {
+  border-bottom: 0;
+}
+
+.reputation-history-main {
+  min-width: 0;
+}
+
+.reputation-history-main strong,
+.reputation-history-main span,
+.reputation-history-main small {
+  display: block;
+}
+
+.reputation-history-main strong {
+  color: #172033;
+  font-size: 13px;
+}
+
+.reputation-history-main span {
+  margin-top: 4px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.reputation-history-main small {
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.reputation-delta {
+  min-width: 64px;
+  text-align: right;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.reputation-delta.positive {
+  color: #047857;
+}
+
+.reputation-delta.negative {
+  color: #b91c1c;
+}
+
+.reputation-delta.neutral {
+  color: #64748b;
+}
+
+.reputation-delta small {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.reputation-loading,
+.reputation-empty {
+  padding: 28px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 1050px) {
+  .reputation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .reputation-list-card {
+    position: static;
+    max-height: none;
+  }
+
+  .reputation-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 720px) {
+  .reputation-person,
+  .reputation-form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reputation-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reputation-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

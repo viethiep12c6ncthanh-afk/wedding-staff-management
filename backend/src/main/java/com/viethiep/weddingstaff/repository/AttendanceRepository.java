@@ -83,6 +83,25 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
             @Param("username") String username
     );
 
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select attendance
+            from Attendance attendance
+            join fetch attendance.assignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user
+            join fetch attendance.recordedBy
+            left join fetch attendance.confirmedBy
+            where assignment.id = :assignmentId
+            """)
+    Optional<Attendance> findByAssignmentIdForUpdate(
+            @Param("assignmentId") Long assignmentId
+    );
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select attendance

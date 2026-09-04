@@ -30,6 +30,8 @@ class AttendanceServiceTest {
     private ShiftAssignmentRepository assignmentRepository;
     @Mock
     private UserAccountRepository userRepository;
+    @Mock
+    private ReputationService reputationService;
 
     @InjectMocks
     private AttendanceService service;
@@ -121,7 +123,54 @@ class AttendanceServiceTest {
         assertEquals(AttendanceProcessStatus.CONFIRMED, response.processStatus());
         assertEquals(new BigDecimal("100000.00"), response.basePaySnapshot());
         assertEquals(new BigDecimal("0.00"), response.payableAmount());
+        assertEquals(PayrollCalculator.POLICY_VERSION, attendance.getPayrollPolicyVersion());
+        assertEquals(new BigDecimal("0.00"), attendance.getLeaderAllowanceSnapshot());
+        assertEquals(new BigDecimal("0.00"), attendance.getLateDeductionSnapshot());
+        assertEquals(new BigDecimal("0.00"), attendance.getEarlyLeaveDeductionSnapshot());
+        assertEquals(0, attendance.getOvertimeMinutesSnapshot());
+        assertEquals(new BigDecimal("0.00"), attendance.getOvertimePaySnapshot());
         assertEquals(AssignmentStatus.ABSENT, assignment.getStatus());
+        verify(reputationService).applyConfirmedAttendance(attendance, admin);
+    }
+
+    @Test
+    void confirmedLeaderOvertimeStoresMultiRuleSnapshots() {
+        ShiftAssignment assignment = assignment(3L, AssignmentStatus.ASSIGNED);
+        assignment.setShiftRole(ShiftRole.LEADER);
+        UserAccount admin = user("admin", "Quản trị viên", RoleName.ADMIN);
+        Attendance attendance = Attendance.builder()
+                .id(3L)
+                .assignment(assignment)
+                .processStatus(AttendanceProcessStatus.DRAFT)
+                .attendanceResult(AttendanceResult.PRESENT)
+                .checkInAt(LocalDateTime.of(2026, 8, 10, 22, 0))
+                .checkOutAt(LocalDateTime.of(2026, 8, 10, 23, 30))
+                .lateMinutes(0)
+                .earlyLeaveMinutes(0)
+                .recordedBy(admin)
+                .recordedAt(LocalDateTime.now())
+                .build();
+
+        when(attendanceRepository.findByIdForUpdate(3L))
+                .thenReturn(Optional.of(attendance));
+        when(assignmentRepository.findByIdForUpdate(3L))
+                .thenReturn(Optional.of(assignment));
+        when(userRepository.findByUsername("admin"))
+                .thenReturn(Optional.of(admin));
+
+        AttendanceResponse response = service.confirm(3L, "admin");
+
+        assertEquals(AttendanceResult.PRESENT, response.attendanceResult());
+        assertEquals(new BigDecimal("100000.00"), response.basePaySnapshot());
+        assertEquals(new BigDecimal("185000.00"), response.payableAmount());
+        assertEquals(PayrollCalculator.POLICY_VERSION, attendance.getPayrollPolicyVersion());
+        assertEquals(new BigDecimal("10000.00"), attendance.getLeaderAllowanceSnapshot());
+        assertEquals(30, attendance.getOvertimeMinutesSnapshot());
+        assertEquals(new BigDecimal("75000.00"), attendance.getOvertimePaySnapshot());
+        assertEquals(new BigDecimal("0.00"), attendance.getLateDeductionSnapshot());
+        assertEquals(new BigDecimal("0.00"), attendance.getEarlyLeaveDeductionSnapshot());
+        assertEquals(AssignmentStatus.COMPLETED, assignment.getStatus());
+        verify(reputationService).applyConfirmedAttendance(attendance, admin);
     }
 
     @Test

@@ -7,6 +7,7 @@ import {
   getShifts,
   updateShift,
 } from '../../api/shiftApi';
+import ActionDialog from '../../components/common/ActionDialog';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -58,6 +59,7 @@ function ShiftsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   const loadData = async () => {
     try {
@@ -187,32 +189,15 @@ function ShiftsPage() {
     }
   };
 
-  const handleTransition = async (shift, target) => {
-    let reason = null;
-
-    if (target === 'CANCELLED') {
-      reason = window.prompt('Nhập lý do hủy ca:');
-
-      if (reason === null) {
-        return;
-      }
-
-      if (!reason.trim()) {
-        setError('Bắt buộc nhập lý do hủy ca.');
-        return;
-      }
-    }
-
+  const applyTransition = async (shift, target, reason = null) => {
     try {
+      setSaving(true);
       setError('');
       setNotice('');
 
-      await changeShiftStatus(
-        shift.id,
-        target,
-        reason?.trim() || null,
-      );
+      await changeShiftStatus(shift.id, target, reason || null);
 
+      setCancelTarget(null);
       setNotice(`Đã cập nhật trạng thái ca: ${transitionLabels[target]}.`);
       await loadData();
     } catch (err) {
@@ -222,7 +207,18 @@ function ShiftsPage() {
           'Không thể chuyển trạng thái ca.',
         ),
       );
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleTransition = (shift, target) => {
+    if (target === 'CANCELLED') {
+      setCancelTarget(shift);
+      return;
+    }
+
+    applyTransition(shift, target);
   };
 
   return (
@@ -496,6 +492,22 @@ function ShiftsPage() {
           </label>
         </form>
       </Modal>
+
+      <ActionDialog
+        open={Boolean(cancelTarget)}
+        title="Hủy ca làm"
+        message={cancelTarget
+          ? `Hủy ca "${cancelTarget.name}" thuộc sự kiện "${cancelTarget.eventName}"?`
+          : ''}
+        inputLabel="Lý do hủy"
+        required
+        danger
+        confirmLabel="Hủy ca"
+        saving={saving}
+        error={error}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={(reason) => applyTransition(cancelTarget, 'CANCELLED', reason)}
+      />
     </section>
   );
 }

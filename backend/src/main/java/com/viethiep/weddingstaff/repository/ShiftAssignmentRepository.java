@@ -29,10 +29,46 @@ public interface ShiftAssignmentRepository
             Collection<AssignmentStatus> statuses
     );
 
+    long countByEmployeeIdAndStatus(
+            Long employeeId,
+            AssignmentStatus status
+    );
+
+    long countByEmployeeIdAndShiftRoleAndStatus(
+            Long employeeId,
+            ShiftRole shiftRole,
+            AssignmentStatus status
+    );
+
     boolean existsByShiftIdAndEmployeeIdAndStatusIn(
             Long shiftId,
             Long employeeId,
             Collection<AssignmentStatus> statuses
+    );
+
+    @Query("""
+            select count(assignment)
+            from ShiftAssignment assignment
+            where assignment.shiftArea.id = :areaId
+              and assignment.status in :statuses
+              and (:excludeAssignmentId is null or assignment.id <> :excludeAssignmentId)
+            """)
+    long countActiveByArea(
+            @Param("areaId") Long areaId,
+            @Param("statuses") Collection<AssignmentStatus> statuses,
+            @Param("excludeAssignmentId") Long excludeAssignmentId
+    );
+
+    @Query("""
+            select count(distinct assignment)
+            from ShiftAssignment assignment
+            join assignment.tables tableItem
+            where tableItem.id = :tableId
+              and assignment.status in :statuses
+            """)
+    long countActiveByTable(
+            @Param("tableId") Long tableId,
+            @Param("statuses") Collection<AssignmentStatus> statuses
     );
 
     @Query("""
@@ -76,11 +112,72 @@ public interface ShiftAssignmentRepository
             join fetch event.venue
             join fetch assignment.employee employee
             join fetch employee.user
+            where assignment.status in :statuses
+              and shift.startAt < :endAt
+              and shift.endAt > :startAt
+            order by employee.id asc, shift.startAt asc, assignment.id asc
+            """)
+    List<ShiftAssignment> findAllForCoordinationWindow(
+            @Param("startAt") LocalDateTime startAt,
+            @Param("endAt") LocalDateTime endAt,
+            @Param("statuses") Collection<AssignmentStatus> statuses
+    );
+
+    @Query("""
+            select distinct assignment
+            from ShiftAssignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user
             join fetch assignment.assignedBy
             left join fetch assignment.registration
+            left join fetch assignment.shiftArea
+            left join fetch assignment.tables
             order by assignment.createdAt desc
             """)
     List<ShiftAssignment> findAllWithDetails();
+
+    @Query("""
+            select distinct assignment
+            from ShiftAssignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user user
+            join fetch assignment.assignedBy
+            left join fetch assignment.registration
+            left join fetch assignment.shiftArea
+            left join fetch assignment.tables
+            where user.username = :username
+            order by shift.startAt desc, assignment.id desc
+            """)
+    List<ShiftAssignment> findAllByEmployeeUsernameWithDetails(
+            @Param("username") String username
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select assignment
+            from ShiftAssignment assignment
+            join fetch assignment.shift shift
+            join fetch shift.event event
+            join fetch event.venue
+            join fetch assignment.employee employee
+            join fetch employee.user user
+            join fetch assignment.assignedBy
+            left join fetch assignment.registration
+            where shift.id = :shiftId
+              and user.username = :username
+              and assignment.status in :statuses
+            """)
+    Optional<ShiftAssignment> findOwnedActiveForUpdate(
+            @Param("shiftId") Long shiftId,
+            @Param("username") String username,
+            @Param("statuses") Collection<AssignmentStatus> statuses
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

@@ -15,6 +15,9 @@ const labels = {
   PENDING: 'Chờ duyệt',
   APPROVED: 'Đã duyệt',
   REJECTED: 'Từ chối',
+  ACCEPTED: 'Đã nhận thay',
+  DECLINED: 'Đã từ chối',
+  FILLED: 'Đã có người thay',
 
   ASSIGNED: 'Đã phân công',
   ABSENT: 'Vắng mặt',

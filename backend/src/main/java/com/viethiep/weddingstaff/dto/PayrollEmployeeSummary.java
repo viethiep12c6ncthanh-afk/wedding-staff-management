@@ -10,6 +10,10 @@ public record PayrollEmployeeSummary(
         long paidShiftCount,
         long absentShiftCount,
         BigDecimal totalBasePay,
+        BigDecimal totalLeaderAllowance,
+        BigDecimal totalLateDeduction,
+        BigDecimal totalEarlyLeaveDeduction,
+        BigDecimal totalOvertimePay,
         BigDecimal totalPayable
 ) {
 }

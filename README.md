@@ -1,61 +1,188 @@
-# Wedding Staff Management System
+# Wedding Staff Management System — DACN v1.0
 
-Hệ thống quản lý ca làm và điều phối nhân sự phục vụ tiệc cưới, sự kiện đa địa điểm.
+Hệ thống quản lý ca làm và điều phối nhân sự phục vụ tiệc cưới, sự kiện đa địa điểm tích hợp AI.
 
-Repository này chứa phiên bản **Đồ án cơ sở (DACS)**. Các chức năng AI và các cơ chế nâng cao được dành cho giai đoạn **Đồ án chuyên ngành (DACN)**, không thuộc phạm vi bản DACS.
+Bản này là kết quả phát triển **Đồ án chuyên ngành (DACN)** trên baseline DACS `dacs-v1.0.0`.
+Nhánh phát triển: `develop/dacn`. Release tag mục tiêu: `dacn-v1.0.0`.
 
-## Công nghệ
+## 1. Chức năng chính
 
-- Backend: Java 21, Spring Boot, Spring Security + JWT, Spring Data JPA, Maven
-- Frontend: React, Vite, Axios, React Router
-- Database: MySQL 8.4
-- API: REST/JSON
+### Nền tảng DACS được bảo toàn
 
-## Chức năng DACS
+- Đăng nhập JWT và phân quyền `ADMIN`, `COORDINATOR`, `EMPLOYEE`.
+- Quản lý nhân viên, địa điểm, sự kiện và ca làm.
+- Đăng ký ca, duyệt/từ chối, phân công từ đăng ký hoặc phân công trực tiếp.
+- Kiểm tra trùng lịch theo khoảng `[start, end)`.
+- Chấm công `DRAFT -> CONFIRMED`.
+- Báo cáo tiền công dựa trên snapshot đã xác nhận.
 
-- Đăng nhập JWT và phân quyền `ADMIN`, `COORDINATOR`, `EMPLOYEE`
-- Quản lý nhân viên và tài khoản
-- Quản lý địa điểm, sự kiện và ca làm
-- Đăng ký ca; duyệt hoặc từ chối đăng ký
-- Phân công từ đăng ký hoặc phân công trực tiếp
-- Kiểm tra trùng lịch cơ bản
-- Chấm công cơ bản: có mặt, đi trễ, về sớm, trễ và về sớm, vắng mặt
-- Chốt tiền công cố định theo ca khi xác nhận chấm công
-- Dashboard tổng quan
-- Báo cáo tiền công theo khoảng ngày và theo nhân viên
-- Xử lý lỗi API thống nhất và automated tests cho các nghiệp vụ backend cốt lõi
+### Mở rộng DACN
 
-## Vai trò nghiệp vụ
+- Điều phối nhiều ca / nhiều địa điểm và cảnh báo thiếu nhân sự.
+- Uy tín nhân viên + lịch sử đánh giá có thể truy vết.
+- Yêu cầu thay ca, lời mời người thay và bảo toàn lịch sử phân công.
+- Lọc ứng viên bằng hard constraints + deterministic scoring.
+- Hybrid AI recommendation: deterministic ranking -> LLM rerank/explain -> coordinator quyết định.
+- Ollama local mặc định; OpenAI là provider tùy chọn.
+- QR check-in/check-out, OTP fallback và GPS bán kính tùy chọn.
+- Phân khu vực/bàn có cấu trúc cho từng ca.
+- Tính công nhiều quy tắc: phụ cấp LEADER, đi trễ, về sớm, tăng ca, vắng mặt.
+- Dashboard vận hành, workforce, replacement, AI analytics và payroll.
+- Responsive UI, modal/dialog thống nhất và các trạng thái loading/error/disabled.
 
-- `ADMIN`: quản trị hệ thống
-- `COORDINATOR`: điều phối nghiệp vụ
-- `EMPLOYEE`: nhân viên đăng ký ca và xem dữ liệu cá nhân
+## 2. Vai trò
 
-`LEADER` không phải role tài khoản. Đây là `shiftRole` của nhân viên trong từng ca, cùng với `STAFF`.
+| Vai trò | Phạm vi |
+|---|---|
+| `ADMIN` | Quản trị và toàn bộ nghiệp vụ quản lý |
+| `COORDINATOR` | Điều phối ca, nhân sự, replacement, attendance, dashboard/report |
+| `EMPLOYEE` | Đăng ký ca, xem phân công cá nhân, replacement cá nhân, QR/OTP attendance |
 
-## Chạy backend local
+`LEADER` **không phải account role**. Đây là `ShiftRole` theo từng ca, cùng với `STAFF`.
 
-Backend cần các biến môi trường tối thiểu:
+## 3. Kiến trúc
 
 ```text
-DB_USERNAME
-DB_PASSWORD
-JWT_SECRET
-SPRING_PROFILES_ACTIVE=dev
-JPA_DDL_AUTO=update
-JWT_EXPIRATION_MS=86400000
-SEED_ENABLED=false
+React / Vite
+    |
+    | REST JSON + JWT
+    v
+Spring Boot
+    Controller
+        -> Service (@Transactional)
+            -> Repository (Spring Data JPA)
+                -> MySQL
+
+Recommendation:
+Hard constraints
+    -> deterministic scoring
+        -> optional LLM rerank/explanation
+            -> Coordinator final decision
 ```
 
-Sau đó chạy `WeddingStaffApplication` bằng IntelliJ hoặc Maven.
+AI không được tạo employee ID mới, bỏ qua hard constraints, tự gửi invitation hoặc tự tạo assignment.
 
-Backend mặc định chạy tại:
+## 4. Công nghệ
+
+- Java 21
+- Spring Boot 3.5.4
+- Spring Security + JWT
+- Spring Data JPA / Hibernate
+- Bean Validation
+- MySQL 8.4
+- Maven
+- React 19
+- Vite 8
+- Axios
+- React Router
+- Ollama local hoặc OpenAI cho AI-assisted recommendation
+
+## 5. Database
+
+Các script trong `database/migrations` là **manual one-time migrations**, không phải Flyway runtime migrations.
+
+Thứ tự hiện tại:
+
+```text
+V002__user_employee_refactor.sql
+V003__venue_event_shift_refactor.sql
+V004__registration_assignment_refactor.sql
+V004_1__allow_reassignment_after_cancellation.sql
+V005__attendance_basic_pay_refactor.sql
+V006__employee_management.sql
+V007__employee_reputation_and_evaluation.sql
+V008__replacement_staffing_workflow.sql
+V009__ai_assisted_recommendation.sql
+V010__qr_otp_gps_attendance.sql
+V011__advanced_area_table_assignment.sql
+V012__multi_rule_payroll.sql
+```
+
+### Database mới
+
+Áp dụng từng script theo đúng thứ tự, **mỗi script đúng một lần**.
+
+### Database dev đã migrate
+
+Không chạy lại V011/V012 hoặc các script trước đó. Khi xác minh release, ưu tiên:
+
+```text
+JPA_DDL_AUTO=validate
+```
+
+`update` chỉ phù hợp cho development có kiểm soát; SQL migration mới là bản ghi version schema của project.
+
+## 6. Cấu hình backend
+
+Các secret không được commit. Backend đọc từ environment variables.
+
+Tối thiểu:
+
+```text
+DB_USERNAME=root
+DB_PASSWORD=<local-secret>
+JWT_SECRET=<strong-random-secret>
+SPRING_PROFILES_ACTIVE=dev
+JPA_DDL_AUTO=validate
+```
+
+Tùy chọn:
+
+```text
+DB_URL=jdbc:mysql://localhost:3306/wedding_staff_management?...
+SERVER_PORT=8080
+JWT_EXPIRATION_MS=86400000
+
+SEED_ENABLED=false
+SEED_ADMIN_PASSWORD=
+SEED_COORDINATOR_PASSWORD=
+SEED_EMPLOYEE_PASSWORD=
+```
+
+AI local bằng Ollama:
+
+```text
+AI_ENABLED=true
+AI_PROVIDER=OLLAMA
+AI_BASE_URL=http://localhost:11434
+AI_MODEL=qwen3:4b-instruct
+AI_TIMEOUT_MS=60000
+AI_CANDIDATE_LIMIT=5
+AI_RECENT_EVALUATION_LIMIT=3
+```
+
+OpenAI là provider tùy chọn:
+
+```text
+AI_ENABLED=true
+AI_PROVIDER=OPENAI
+AI_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=<secret>
+AI_MODEL=<configured-model>
+```
+
+Không commit `DB_PASSWORD`, `JWT_SECRET`, `AI_API_KEY` hoặc mật khẩu seed.
+
+## 7. Chạy backend
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+Mặc định:
 
 ```text
 http://localhost:8080
 ```
 
-## Chạy frontend local
+API base:
+
+```text
+http://localhost:8080/api
+```
+
+## 8. Chạy frontend
 
 ```bash
 cd frontend
@@ -63,42 +190,130 @@ npm install
 npm run dev
 ```
 
-Frontend mặc định gọi API tại:
+Frontend mặc định gọi:
 
 ```text
 http://localhost:8080/api
 ```
 
-Có thể thay đổi bằng biến môi trường Vite:
+Có thể override:
 
 ```text
 VITE_API_BASE_URL=http://localhost:8080/api
 ```
 
-## Kiểm tra trước khi đóng bản DACS
-
-Backend:
-
-```bash
-mvn clean test
-```
-
-Frontend:
+Production build:
 
 ```bash
 npm run build
 ```
 
-Chỉ tạo tag `dacs-v1.0.0` sau khi automated tests, production build và smoke test các luồng chính đều thành công.
+## 9. AI demo local
 
-## Phạm vi DACN dự kiến
+Cài Ollama và tải model trước khi demo:
 
-Các chức năng sau được phát triển tiếp ở Đồ án chuyên ngành:
+```bash
+ollama pull qwen3:4b-instruct
+```
 
-- Chấm công QR / OTP / GPS
-- Điểm uy tín nhân viên
-- Gợi ý nhân sự và thay thế tự động
-- Điều phối khu vực/bàn nâng cao
-- Tính công nhiều quy tắc
-- Dashboard/báo cáo nâng cao
-- AI hỗ trợ gợi ý và điều phối nhân sự
+Nếu AI tắt, Ollama không chạy, provider timeout hoặc output không hợp lệ, workflow vẫn trả deterministic fallback.
+
+## 10. Kiểm thử release
+
+Backend:
+
+```bash
+cd backend
+mvn clean test
+```
+
+Baseline release hiện tại: **94 tests, 0 failures, 0 errors**.
+
+Frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+Runtime security gate đã kiểm tra:
+
+```text
+No JWT              -> 401
+Invalid JWT         -> 401
+ADMIN manager API   -> 200
+ADMIN employee-only -> 403
+One-sided GPS       -> 400
+Allowed CORS origin -> 200
+Untrusted origin    -> 403
+```
+
+Chi tiết: `docs/dacn/14_TEST_REPORT_DACN_v1.0.md`.
+
+## 11. Demo end-to-end
+
+Luồng demo chính:
+
+```text
+Dashboard nhiều địa điểm
+    -> phát hiện ca thiếu người
+    -> employee gửi yêu cầu thay ca
+    -> coordinator duyệt
+    -> deterministic candidate ranking
+    -> AI hỗ trợ rerank/giải thích
+    -> coordinator mời ứng viên
+    -> employee nhận thay
+    -> phân khu vực/bàn
+    -> QR/OTP check-in + check-out
+    -> manager CONFIRM attendance
+    -> reputation + payroll snapshot cập nhật
+    -> dashboard/report phản ánh kết quả
+```
+
+Kịch bản chi tiết và dữ liệu cần chuẩn bị:
+`docs/dacn/14_RELEASE_DEMO_DACN_v1.0.md`.
+
+## 12. Tài liệu
+
+- `docs/dacn/01_ARCHITECTURE_REVIEW_DACN_v1.0.md`
+- `docs/dacn/02_ROADMAP_DACN_v1.0.md`
+- `docs/dacn/03_REPUTATION_RULES_DACN_v1.0.md`
+- `docs/dacn/04_CANCELLATION_REPLACEMENT_RULES_DACN_v1.0.md`
+- `docs/dacn/05_DETERMINISTIC_CANDIDATE_SCORING_DACN_v1.0.md`
+- `docs/dacn/06_HYBRID_AI_ASSISTED_RECOMMENDATION_DACN_v1.0.md`
+- `docs/dacn/07_QR_ATTENDANCE_BACKEND_DACN_v1.0.md`
+- `docs/dacn/08_QR_ATTENDANCE_FRONTEND_DACN_v1.0.md`
+- `docs/dacn/09_ADVANCED_AREA_TABLE_ASSIGNMENT_DACN_v1.0.md`
+- `docs/dacn/10_MULTI_RULE_PAYROLL_DACN_v1.0.md`
+- `docs/dacn/11_ADVANCED_DASHBOARD_REPORTS_DACN_v1.0.md`
+- `docs/dacn/12_UI_UX_POLISH_DACN_v1.0.md`
+- `docs/dacn/13_INTEGRATION_SECURITY_REGRESSION_DACN_v1.0.md`
+- `docs/dacn/14_DIAGRAMS_DACN_v1.0.md`
+- `docs/dacn/14_TEST_REPORT_DACN_v1.0.md`
+- `docs/dacn/14_RELEASE_DEMO_DACN_v1.0.md`
+- `docs/dacn/14_RELEASE_CHECKLIST_DACN_v1.0.md`
+
+Postman:
+`docs/postman/Wedding_Staff_Management_DACN_v1.postman_collection.json`.
+
+## 13. Giới hạn có chủ đích
+
+- Không WebSocket/realtime dashboard.
+- Không shift swap.
+- Không floorplan/drag-drop 2D/3D.
+- Không Maps routing.
+- Không Excel/PDF export.
+- Không Kubernetes/deployment platform.
+- Không để AI tự động ra quyết định nhân sự.
+- Chưa có browser E2E automation hoặc database-container integration suite; release dựa trên backend automated tests + production build + runtime/API/UI smoke.
+
+## 14. Release
+
+Sau khi `14_RELEASE_CHECKLIST_DACN_v1.0.md` PASS:
+
+```bash
+git commit -m "release(dacn): finalize documentation demo and release"
+git tag dacn-v1.0.0
+```
+
+Không tạo release tag trước khi working tree sạch và final regression PASS.

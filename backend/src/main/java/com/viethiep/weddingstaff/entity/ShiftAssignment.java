@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -49,8 +51,19 @@ public class ShiftAssignment extends BaseEntity {
     @Column(name = "shift_role", nullable = false, length = 20)
     private ShiftRole shiftRole = ShiftRole.STAFF;
 
-    @Column(length = 100)
-    private String area;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_area_id")
+    private ShiftArea shiftArea;
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "shift_assignment_tables",
+            joinColumns = @JoinColumn(name = "assignment_id"),
+            inverseJoinColumns = @JoinColumn(name = "table_id")
+    )
+    @OrderBy("tableCode ASC")
+    private Set<ShiftTable> tables = new LinkedHashSet<>();
 
     @Column(length = 300)
     private String task;

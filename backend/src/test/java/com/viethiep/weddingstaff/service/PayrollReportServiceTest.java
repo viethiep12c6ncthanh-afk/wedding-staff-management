@@ -56,12 +56,20 @@ class PayrollReportServiceTest {
                 employee,
                 AttendanceResult.PRESENT,
                 "100000.00",
-                "100000.00"
+                "10000.00",
+                "5000.00",
+                "0.00",
+                "15000.00",
+                "120000.00"
         );
         Attendance absent = attendance(
                 employee,
                 AttendanceResult.ABSENT,
                 "100000.00",
+                "0.00",
+                "0.00",
+                "0.00",
+                "0.00",
                 "0.00"
         );
 
@@ -78,10 +86,18 @@ class PayrollReportServiceTest {
         assertEquals(1, response.paidShiftCount());
         assertEquals(1, response.absentShiftCount());
         assertEquals(new BigDecimal("200000.00"), response.totalBasePay());
-        assertEquals(new BigDecimal("100000.00"), response.totalPayable());
+        assertEquals(new BigDecimal("10000.00"), response.totalLeaderAllowance());
+        assertEquals(new BigDecimal("5000.00"), response.totalLateDeduction());
+        assertEquals(new BigDecimal("0.00"), response.totalEarlyLeaveDeduction());
+        assertEquals(new BigDecimal("15000.00"), response.totalOvertimePay());
+        assertEquals(new BigDecimal("120000.00"), response.totalPayable());
         assertEquals(1, response.employees().size());
         assertEquals(2, response.employees().getFirst().confirmedShiftCount());
         assertEquals(1, response.employees().getFirst().absentShiftCount());
+        assertEquals(new BigDecimal("10000.00"),
+                response.employees().getFirst().totalLeaderAllowance());
+        assertEquals(new BigDecimal("15000.00"),
+                response.employees().getFirst().totalOvertimePay());
     }
 
     @Test
@@ -127,6 +143,10 @@ class PayrollReportServiceTest {
             Employee employee,
             AttendanceResult result,
             String basePay,
+            String leaderAllowance,
+            String lateDeduction,
+            String earlyLeaveDeduction,
+            String overtimePay,
             String payable
     ) {
         ShiftAssignment assignment = ShiftAssignment.builder()
@@ -137,6 +157,10 @@ class PayrollReportServiceTest {
                 .processStatus(AttendanceProcessStatus.CONFIRMED)
                 .attendanceResult(result)
                 .basePaySnapshot(new BigDecimal(basePay))
+                .leaderAllowanceSnapshot(new BigDecimal(leaderAllowance))
+                .lateDeductionSnapshot(new BigDecimal(lateDeduction))
+                .earlyLeaveDeductionSnapshot(new BigDecimal(earlyLeaveDeduction))
+                .overtimePaySnapshot(new BigDecimal(overtimePay))
                 .payableAmount(new BigDecimal(payable))
                 .build();
     }

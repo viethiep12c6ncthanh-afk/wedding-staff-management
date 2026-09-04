@@ -26,6 +26,8 @@ class EmployeeServiceTest {
     private RoleRepository roleRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private ReputationService reputationService;
 
     @InjectMocks
     private EmployeeService service;

@@ -11,6 +11,10 @@ public record PayrollReportResponse(
         long paidShiftCount,
         long absentShiftCount,
         BigDecimal totalBasePay,
+        BigDecimal totalLeaderAllowance,
+        BigDecimal totalLateDeduction,
+        BigDecimal totalEarlyLeaveDeduction,
+        BigDecimal totalOvertimePay,
         BigDecimal totalPayable,
         List<PayrollEmployeeSummary> employees
 ) {

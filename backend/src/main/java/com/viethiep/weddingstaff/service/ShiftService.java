@@ -23,6 +23,7 @@ public class ShiftService {
     private final ShiftRegistrationRepository registrationRepository;
     private final ShiftAssignmentRepository assignmentRepository;
     private final UserAccountRepository userRepository;
+    private final ReplacementService replacementService;
 
     @Transactional(readOnly = true)
     public List<ShiftResponse> findAll() {
@@ -101,6 +102,7 @@ public class ShiftService {
             shift.setCancelledAt(LocalDateTime.now());
             shift.setCancellationReason(reason);
             cancelRegistrationsAndAssignments(shift, actor, reason);
+            replacementService.cancelForShift(shift.getId(), reason);
         }
 
         shift.setShiftStatus(target);
@@ -198,7 +200,7 @@ public class ShiftService {
     }
 
     private WorkShift findShift(Long id) {
-        return shiftRepository.findById(id)
+        return shiftRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Không tìm thấy ca")
                 );

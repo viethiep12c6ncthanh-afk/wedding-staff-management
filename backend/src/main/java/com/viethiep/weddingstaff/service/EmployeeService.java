@@ -30,6 +30,7 @@ public class EmployeeService {
     private final UserAccountRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ReputationService reputationService;
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> findAll(
@@ -86,7 +87,9 @@ public class EmployeeService {
                 .note(normalizeOptional(request.note()))
                 .build();
 
-        return toResponse(employeeRepository.save(employee));
+        Employee savedEmployee = employeeRepository.save(employee);
+        reputationService.initializeEmployee(savedEmployee);
+        return toResponse(savedEmployee);
     }
 
     @Transactional

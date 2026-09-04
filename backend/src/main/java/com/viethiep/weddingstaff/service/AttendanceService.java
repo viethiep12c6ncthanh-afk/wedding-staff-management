@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
@@ -31,10 +30,13 @@ import java.util.List;
 public class AttendanceService {
     private static final EnumSet<AssignmentStatus> ATTENDABLE_STATUSES =
             EnumSet.of(AssignmentStatus.ASSIGNED, AssignmentStatus.CONFIRMED);
+    private static final PayrollCalculator PAYROLL_CALCULATOR =
+            new PayrollCalculator();
 
     private final AttendanceRepository attendanceRepository;
     private final ShiftAssignmentRepository assignmentRepository;
     private final UserAccountRepository userRepository;
+    private final ReputationService reputationService;
 
     @Transactional(readOnly = true)
     public List<AttendanceResponse> findAll() {
@@ -143,17 +145,20 @@ public class AttendanceService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        BigDecimal basePay = assignment.getShift().getPayAmount();
-        BigDecimal payable = attendance.getAttendanceResult()
-                == AttendanceResult.ABSENT
-                ? BigDecimal.ZERO.setScale(basePay.scale())
-                : basePay;
+        PayrollCalculator.Result payroll =
+                PAYROLL_CALCULATOR.calculate(assignment, attendance);
 
         attendance.setProcessStatus(AttendanceProcessStatus.CONFIRMED);
         attendance.setConfirmedBy(confirmer);
         attendance.setConfirmedAt(now);
-        attendance.setBasePaySnapshot(basePay);
-        attendance.setPayableAmount(payable);
+        attendance.setBasePaySnapshot(payroll.basePay());
+        attendance.setPayableAmount(payroll.payableAmount());
+        attendance.setPayrollPolicyVersion(payroll.policyVersion());
+        attendance.setLeaderAllowanceSnapshot(payroll.leaderAllowance());
+        attendance.setLateDeductionSnapshot(payroll.lateDeduction());
+        attendance.setEarlyLeaveDeductionSnapshot(payroll.earlyLeaveDeduction());
+        attendance.setOvertimeMinutesSnapshot(payroll.overtimeMinutes());
+        attendance.setOvertimePaySnapshot(payroll.overtimePay());
 
         assignment.setStatus(
                 attendance.getAttendanceResult() == AttendanceResult.ABSENT
@@ -161,7 +166,99 @@ public class AttendanceService {
                         : AssignmentStatus.COMPLETED
         );
 
+        reputationService.applyConfirmedAttendance(attendance, confirmer);
+
         return toResponse(attendance);
+    }
+
+    /*
+     * Package-private entry points used only by QrAttendanceService.
+     * The QR/OTP layer verifies the session. AttendanceService remains the
+     * owner of DRAFT attendance mutation and existing attendance rules.
+     */
+    public AttendanceResponse selfCheckIn(
+            ShiftAssignment assignment,
+            UserAccount actor,
+            LocalDateTime occurredAt
+    ) {
+        ensureAssignmentCanBeAttended(assignment);
+        ensureSelfActor(actor, assignment);
+
+        Attendance attendance = attendanceRepository
+                .findByAssignmentIdForUpdate(assignment.getId())
+                .orElseGet(() -> Attendance.builder()
+                        .assignment(assignment)
+                        .processStatus(AttendanceProcessStatus.DRAFT)
+                        .recordedBy(actor)
+                        .recordedAt(occurredAt)
+                        .build());
+
+        ensureDraft(attendance);
+        if (attendance.getAttendanceResult() == AttendanceResult.ABSENT) {
+            throw new IllegalStateException(
+                    "Bản ghi đang được đánh dấu vắng mặt; cần điều phối viên xử lý trước"
+            );
+        }
+        if (attendance.getCheckInAt() != null) {
+            throw new IllegalStateException("Nhân viên đã check-in cho ca này");
+        }
+
+        attendance.setCheckInAt(occurredAt);
+        attendance.setRecordedBy(actor);
+        attendance.setRecordedAt(occurredAt);
+        calculateAttendanceResult(attendance);
+
+        return toResponse(attendanceRepository.save(attendance));
+    }
+
+    public AttendanceResponse selfCheckOut(
+            ShiftAssignment assignment,
+            UserAccount actor,
+            LocalDateTime occurredAt
+    ) {
+        ensureAssignmentCanBeAttended(assignment);
+        ensureSelfActor(actor, assignment);
+
+        Attendance attendance = attendanceRepository
+                .findByAssignmentIdForUpdate(assignment.getId())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Chưa có check-in cho ca này"
+                ));
+
+        ensureDraft(attendance);
+        if (attendance.getAttendanceResult() == AttendanceResult.ABSENT) {
+            throw new IllegalStateException(
+                    "Bản ghi đang được đánh dấu vắng mặt; không thể tự check-out"
+            );
+        }
+        if (attendance.getCheckInAt() == null) {
+            throw new IllegalStateException("Chưa có check-in cho ca này");
+        }
+        if (attendance.getCheckOutAt() != null) {
+            throw new IllegalStateException("Nhân viên đã check-out cho ca này");
+        }
+
+        validateTimeOrder(attendance.getCheckInAt(), occurredAt);
+        attendance.setCheckOutAt(occurredAt);
+        attendance.setRecordedBy(actor);
+        attendance.setRecordedAt(occurredAt);
+        calculateAttendanceResult(attendance);
+
+        return toResponse(attendanceRepository.save(attendance));
+    }
+
+    private void ensureSelfActor(
+            UserAccount actor,
+            ShiftAssignment assignment
+    ) {
+        if (actor.getRole().getName() != RoleName.EMPLOYEE
+                || !actor.getUsername().equals(
+                        assignment.getEmployee().getUser().getUsername()
+                )) {
+            throw new IllegalStateException(
+                    "Chỉ nhân viên được phân công mới được tự chấm công"
+            );
+        }
     }
 
     private void applyDraftData(

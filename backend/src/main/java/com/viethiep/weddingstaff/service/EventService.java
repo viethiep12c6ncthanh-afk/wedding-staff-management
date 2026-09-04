@@ -24,6 +24,7 @@ public class EventService {
     private final ShiftRegistrationRepository registrationRepository;
     private final ShiftAssignmentRepository assignmentRepository;
     private final UserAccountRepository userRepository;
+    private final ReplacementService replacementService;
 
     @Transactional(readOnly = true)
     public List<EventResponse> findAll() {
@@ -110,6 +111,7 @@ public class EventService {
             shift.setCancelledBy(actor);
             shift.setCancelledAt(LocalDateTime.now());
             shift.setCancellationReason(reason);
+            replacementService.cancelForShift(shift.getId(), reason);
 
             registrationRepository.findAllByShiftIdAndStatusIn(
                     shift.getId(),

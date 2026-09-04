@@ -3,6 +3,7 @@ package com.viethiep.weddingstaff.repository;
 import com.viethiep.weddingstaff.entity.Employee;
 import com.viethiep.weddingstaff.enumtype.AccountStatus;
 import com.viethiep.weddingstaff.enumtype.EmployeeStatus;
+import com.viethiep.weddingstaff.enumtype.RoleName;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,23 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             where employee.id = :id
             """)
     Optional<Employee> findByIdWithUser(@Param("id") Long id);
+
+
+    @Query("""
+            select employee
+            from Employee employee
+            join fetch employee.user u
+            join fetch u.role role
+            where employee.employmentStatus = :employmentStatus
+              and u.accountStatus = :accountStatus
+              and role.name = :roleName
+            order by employee.employeeCode asc, employee.id asc
+            """)
+    List<Employee> findCandidatePool(
+            @Param("employmentStatus") EmployeeStatus employmentStatus,
+            @Param("accountStatus") AccountStatus accountStatus,
+            @Param("roleName") RoleName roleName
+    );
 
     @Query("""
             select employee

@@ -9,7 +9,6 @@ public record DirectAssignmentRequest(
         @NotNull @Positive Long shiftId,
         @NotNull @Positive Long employeeId,
         @NotNull ShiftRole shiftRole,
-        @Size(max = 100) String area,
         @Size(max = 300) String task
 ) {
 }
