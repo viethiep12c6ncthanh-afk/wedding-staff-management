@@ -8,6 +8,7 @@ import {
   registerShift,
   reviewRegistration,
 } from '../../api/registrationApi';
+import ActionDialog from '../../components/common/ActionDialog';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -38,6 +39,7 @@ function RegistrationsPage() {
   const [notice, setNotice] = useState('');
 
   const [reviewing, setReviewing] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
   const [reviewForm, setReviewForm] = useState({
     approved: true,
     shiftRole: 'STAFF',
@@ -131,15 +133,12 @@ function RegistrationsPage() {
     }
   };
 
-  const handleCancelMine = async (registration) => {
-    const reason = window.prompt('Nhập lý do hủy đăng ký:');
+  const handleCancelMine = (registration) => {
+    setCancelTarget(registration);
+  };
 
-    if (reason === null) {
-      return;
-    }
-
-    if (!reason.trim()) {
-      setError('Bắt buộc nhập lý do hủy đăng ký.');
+  const confirmCancelMine = async (reason) => {
+    if (!cancelTarget) {
       return;
     }
 
@@ -148,11 +147,9 @@ function RegistrationsPage() {
       setError('');
       setNotice('');
 
-      await cancelMyRegistration(
-        registration.id,
-        reason.trim(),
-      );
+      await cancelMyRegistration(cancelTarget.id, reason);
 
+      setCancelTarget(null);
       setNotice('Đã hủy đăng ký ca.');
       await loadData();
     } catch (err) {
@@ -506,6 +503,22 @@ function RegistrationsPage() {
           )}
         </form>
       </Modal>
+
+      <ActionDialog
+        open={Boolean(cancelTarget)}
+        title="Hủy đăng ký ca"
+        message={cancelTarget
+          ? `Hủy đăng ký ca "${cancelTarget.shiftName}"? Hệ thống vẫn áp dụng giới hạn thời gian tự hủy hiện có.`
+          : ''}
+        inputLabel="Lý do hủy"
+        required
+        danger
+        confirmLabel="Hủy đăng ký"
+        saving={saving}
+        error={error}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={confirmCancelMine}
+      />
     </section>
   );
 }

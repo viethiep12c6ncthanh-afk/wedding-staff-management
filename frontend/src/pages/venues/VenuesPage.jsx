@@ -7,6 +7,7 @@ import {
   getVenues,
   updateVenue,
 } from '../../api/venueApi';
+import ActionDialog from '../../components/common/ActionDialog';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -42,6 +43,7 @@ function VenuesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(null);
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
 
   const loadVenues = async () => {
     try {
@@ -149,7 +151,13 @@ function VenuesPage() {
   };
 
   const handleStatus = async (venue, status) => {
+    if (status === 'INACTIVE') {
+      setDeactivateTarget(venue);
+      return;
+    }
+
     try {
+      setSaving(true);
       setError('');
       setNotice('');
       await changeVenueStatus(venue.id, status);
@@ -162,24 +170,34 @@ function VenuesPage() {
           'Không thể cập nhật trạng thái địa điểm.',
         ),
       );
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDeactivate = async (venue) => {
-    if (!window.confirm(`Ngừng hoạt động địa điểm "${venue.name}"?`)) {
+  const handleDeactivate = (venue) => {
+    setDeactivateTarget(venue);
+  };
+
+  const confirmDeactivate = async () => {
+    if (!deactivateTarget) {
       return;
     }
 
     try {
+      setSaving(true);
       setError('');
       setNotice('');
-      await deactivateVenue(venue.id);
+      await deactivateVenue(deactivateTarget.id);
+      setDeactivateTarget(null);
       setNotice('Địa điểm đã chuyển sang ngừng hoạt động.');
       await loadVenues();
     } catch (err) {
       setError(
         getApiErrorMessage(err, 'Không thể ngừng hoạt động địa điểm.'),
       );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -388,6 +406,20 @@ function VenuesPage() {
           </label>
         </form>
       </Modal>
+
+      <ActionDialog
+        open={Boolean(deactivateTarget)}
+        title="Ngừng hoạt động địa điểm"
+        message={deactivateTarget
+          ? `Ngừng hoạt động địa điểm "${deactivateTarget.name}"? Địa điểm sẽ không còn được dùng cho dữ liệu mới cho tới khi kích hoạt lại.`
+          : ''}
+        danger
+        confirmLabel="Ngừng hoạt động"
+        saving={saving}
+        error={error}
+        onClose={() => setDeactivateTarget(null)}
+        onConfirm={confirmDeactivate}
+      />
     </section>
   );
 }

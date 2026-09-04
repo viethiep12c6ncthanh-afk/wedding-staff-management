@@ -12,6 +12,7 @@ import {
   respondReplacementInvitation,
   reviewReplacementRequest,
 } from '../../api/replacementApi';
+import ActionDialog from '../../components/common/ActionDialog';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { formatDateTime } from '../../utils/formatters';
@@ -58,6 +59,8 @@ function ReplacementPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [reviewDialog, setReviewDialog] = useState(null);
+  const [invitationDialog, setInvitationDialog] = useState(null);
 
   const loadData = async () => {
     try {
@@ -156,20 +159,16 @@ function ReplacementPage() {
     }
   };
 
-  const handleReview = async (request, approved) => {
-    let reviewNote = null;
-    if (!approved) {
-      reviewNote = window.prompt('Nhập lý do từ chối yêu cầu thay ca:');
-      if (reviewNote === null) return;
-      if (!reviewNote.trim()) {
-        setError('Bắt buộc nhập lý do từ chối.');
-        return;
-      }
-    } else if (!window.confirm(
-      `Duyệt yêu cầu #${request.id}? Phân công hiện tại của ${request.originalEmployeeName} sẽ được hủy và mở vị trí cần người thay.`,
-    )) {
+  const handleReview = (request, approved) => {
+    setReviewDialog({ request, approved });
+  };
+
+  const confirmReview = async (reviewNote) => {
+    if (!reviewDialog) {
       return;
     }
+
+    const { request, approved } = reviewDialog;
 
     try {
       setSaving(true);
@@ -177,8 +176,9 @@ function ReplacementPage() {
       setNotice('');
       await reviewReplacementRequest(request.id, {
         approved,
-        reviewNote: reviewNote?.trim() || null,
+        reviewNote: reviewNote || null,
       });
+      setReviewDialog(null);
       setNotice(approved
         ? 'Đã duyệt yêu cầu và mở vị trí cần người thay.'
         : 'Đã từ chối yêu cầu thay ca.');
@@ -227,16 +227,16 @@ function ReplacementPage() {
     }
   };
 
-  const handleInvitation = async (invitation, accepted) => {
-    let responseNote = null;
-    if (!accepted) {
-      responseNote = window.prompt('Lý do từ chối (có thể để trống):');
-      if (responseNote === null) return;
-    } else if (!window.confirm(
-      `Nhận thay ca "${invitation.shiftName}"? Hệ thống sẽ kiểm tra lại trùng lịch trước khi tạo phân công.`,
-    )) {
+  const handleInvitation = (invitation, accepted) => {
+    setInvitationDialog({ invitation, accepted });
+  };
+
+  const confirmInvitation = async (responseNote) => {
+    if (!invitationDialog) {
       return;
     }
+
+    const { invitation, accepted } = invitationDialog;
 
     try {
       setSaving(true);
@@ -244,8 +244,9 @@ function ReplacementPage() {
       setNotice('');
       await respondReplacementInvitation(invitation.id, {
         accepted,
-        responseNote: responseNote?.trim() || null,
+        responseNote: responseNote || null,
       });
+      setInvitationDialog(null);
       setNotice(accepted
         ? 'Đã nhận thay ca và tạo phân công mới.'
         : 'Đã từ chối lời mời thay ca.');
@@ -625,6 +626,38 @@ function ReplacementPage() {
             ))}
         </div>
       )}
+
+      <ActionDialog
+        open={Boolean(reviewDialog)}
+        title={reviewDialog?.approved ? 'Duyệt yêu cầu thay ca' : 'Từ chối yêu cầu thay ca'}
+        message={reviewDialog?.approved
+          ? `Duyệt yêu cầu #${reviewDialog.request.id}? Phân công hiện tại của ${reviewDialog.request.originalEmployeeName} sẽ được hủy và mở vị trí cần người thay.`
+          : `Từ chối yêu cầu #${reviewDialog?.request?.id ?? ''}. Ghi rõ lý do để nhân viên có thể theo dõi.`}
+        inputLabel={reviewDialog?.approved ? '' : 'Lý do từ chối'}
+        required={!reviewDialog?.approved}
+        danger={!reviewDialog?.approved}
+        confirmLabel={reviewDialog?.approved ? 'Duyệt & mở thay ca' : 'Từ chối yêu cầu'}
+        saving={saving}
+        error={error}
+        onClose={() => setReviewDialog(null)}
+        onConfirm={confirmReview}
+      />
+
+      <ActionDialog
+        open={Boolean(invitationDialog)}
+        title={invitationDialog?.accepted ? 'Nhận thay ca' : 'Từ chối lời mời'}
+        message={invitationDialog?.accepted
+          ? `Nhận thay ca "${invitationDialog.invitation.shiftName}"? Hệ thống sẽ kiểm tra lại trùng lịch trước khi tạo phân công.`
+          : `Từ chối lời mời thay ca "${invitationDialog?.invitation?.shiftName ?? ''}".`}
+        inputLabel={invitationDialog?.accepted ? '' : 'Lý do từ chối'}
+        inputPlaceholder="Có thể để trống"
+        danger={!invitationDialog?.accepted}
+        confirmLabel={invitationDialog?.accepted ? 'Nhận thay ca' : 'Từ chối'}
+        saving={saving}
+        error={error}
+        onClose={() => setInvitationDialog(null)}
+        onConfirm={confirmInvitation}
+      />
     </section>
   );
 }

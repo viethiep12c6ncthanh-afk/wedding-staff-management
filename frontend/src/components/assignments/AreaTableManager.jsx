@@ -11,6 +11,7 @@ import {
   updateShiftTable,
 } from '../../api/placementApi';
 import { getApiErrorMessage } from '../../utils/apiError';
+import Modal from '../common/Modal';
 import '../../styles/assignment-placement.css';
 
 const emptyAreaForm = {
@@ -59,6 +60,8 @@ function AreaTableManager({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [areaEditor, setAreaEditor] = useState(null);
+  const [tableEditor, setTableEditor] = useState(null);
 
   useEffect(() => {
     if (!shiftId && editableShifts.length > 0) {
@@ -172,25 +175,19 @@ function AreaTableManager({
     }
   };
 
-  const handleEditArea = async (area) => {
-    const name = window.prompt('Tên khu vực:', area.name);
-    if (name === null) {
-      return;
-    }
+  const handleEditArea = (area) => {
+    setAreaEditor({
+      id: area.id,
+      name: area.name || '',
+      requiredStaff: area.requiredStaff ?? '',
+      description: area.description || '',
+    });
+  };
 
-    const capacity = window.prompt(
-      'Số nhân viên tối đa của khu vực (để trống nếu không đặt giới hạn):',
-      area.requiredStaff ?? '',
-    );
-    if (capacity === null) {
-      return;
-    }
+  const handleUpdateArea = async (event) => {
+    event.preventDefault();
 
-    const description = window.prompt(
-      'Mô tả khu vực:',
-      area.description || '',
-    );
-    if (description === null) {
+    if (!areaEditor) {
       return;
     }
 
@@ -199,14 +196,15 @@ function AreaTableManager({
       setError('');
       setNotice('');
 
-      await updateShiftArea(area.id, {
-        name: name.trim(),
-        requiredStaff: capacity.trim()
-          ? Number(capacity)
+      await updateShiftArea(areaEditor.id, {
+        name: areaEditor.name.trim(),
+        requiredStaff: String(areaEditor.requiredStaff).trim()
+          ? Number(areaEditor.requiredStaff)
           : null,
-        description: description.trim() || null,
+        description: areaEditor.description.trim() || null,
       });
 
+      setAreaEditor(null);
       setNotice('Đã cập nhật khu vực.');
       await loadAreas();
       await onChanged?.();
@@ -279,28 +277,19 @@ function AreaTableManager({
     }
   };
 
-  const handleEditTable = async (tableItem) => {
-    const tableCode = window.prompt(
-      'Mã bàn:',
-      tableItem.tableCode,
-    );
-    if (tableCode === null) {
-      return;
-    }
+  const handleEditTable = (tableItem) => {
+    setTableEditor({
+      id: tableItem.id,
+      tableCode: tableItem.tableCode || '',
+      displayName: tableItem.displayName || '',
+      note: tableItem.note || '',
+    });
+  };
 
-    const displayName = window.prompt(
-      'Tên hiển thị:',
-      tableItem.displayName || '',
-    );
-    if (displayName === null) {
-      return;
-    }
+  const handleUpdateTable = async (event) => {
+    event.preventDefault();
 
-    const note = window.prompt(
-      'Ghi chú:',
-      tableItem.note || '',
-    );
-    if (note === null) {
+    if (!tableEditor) {
       return;
     }
 
@@ -309,12 +298,13 @@ function AreaTableManager({
       setError('');
       setNotice('');
 
-      await updateShiftTable(tableItem.id, {
-        tableCode: tableCode.trim(),
-        displayName: displayName.trim() || null,
-        note: note.trim() || null,
+      await updateShiftTable(tableEditor.id, {
+        tableCode: tableEditor.tableCode.trim(),
+        displayName: tableEditor.displayName.trim() || null,
+        note: tableEditor.note.trim() || null,
       });
 
+      setTableEditor(null);
       setNotice('Đã cập nhật bàn.');
       await loadAreas();
       await onChanged?.();
@@ -863,6 +853,150 @@ function AreaTableManager({
           </div>
         </form>
       </div>
+
+      <Modal
+        open={Boolean(areaEditor)}
+        title="Cập nhật khu vực"
+        error={error}
+        onClose={() => !saving && setAreaEditor(null)}
+        footer={(
+          <>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setAreaEditor(null)}
+              disabled={saving}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              form="edit-shift-area-form"
+              className="primary-button"
+              disabled={saving}
+            >
+              {saving ? 'Đang lưu...' : 'Cập nhật khu vực'}
+            </button>
+          </>
+        )}
+      >
+        <form
+          id="edit-shift-area-form"
+          className="form-grid form-grid-one"
+          onSubmit={handleUpdateArea}
+        >
+          <label>
+            Tên khu vực *
+            <input
+              value={areaEditor?.name ?? ''}
+              onChange={(event) => setAreaEditor((current) => ({
+                ...current,
+                name: event.target.value,
+              }))}
+              maxLength="100"
+              required
+            />
+          </label>
+
+          <label>
+            Số nhân viên tối đa
+            <input
+              type="number"
+              min="1"
+              value={areaEditor?.requiredStaff ?? ''}
+              onChange={(event) => setAreaEditor((current) => ({
+                ...current,
+                requiredStaff: event.target.value,
+              }))}
+              placeholder="Để trống nếu không giới hạn"
+            />
+          </label>
+
+          <label>
+            Mô tả
+            <textarea
+              rows="4"
+              maxLength="500"
+              value={areaEditor?.description ?? ''}
+              onChange={(event) => setAreaEditor((current) => ({
+                ...current,
+                description: event.target.value,
+              }))}
+            />
+          </label>
+        </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(tableEditor)}
+        title="Cập nhật bàn"
+        error={error}
+        onClose={() => !saving && setTableEditor(null)}
+        footer={(
+          <>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setTableEditor(null)}
+              disabled={saving}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              form="edit-shift-table-form"
+              className="primary-button"
+              disabled={saving}
+            >
+              {saving ? 'Đang lưu...' : 'Cập nhật bàn'}
+            </button>
+          </>
+        )}
+      >
+        <form
+          id="edit-shift-table-form"
+          className="form-grid form-grid-one"
+          onSubmit={handleUpdateTable}
+        >
+          <label>
+            Mã bàn *
+            <input
+              value={tableEditor?.tableCode ?? ''}
+              onChange={(event) => setTableEditor((current) => ({
+                ...current,
+                tableCode: event.target.value,
+              }))}
+              maxLength="30"
+              required
+            />
+          </label>
+
+          <label>
+            Tên hiển thị
+            <input
+              value={tableEditor?.displayName ?? ''}
+              onChange={(event) => setTableEditor((current) => ({
+                ...current,
+                displayName: event.target.value,
+              }))}
+              maxLength="100"
+            />
+          </label>
+
+          <label>
+            Ghi chú
+            <textarea
+              rows="4"
+              maxLength="300"
+              value={tableEditor?.note ?? ''}
+              onChange={(event) => setTableEditor((current) => ({
+                ...current,
+                note: event.target.value,
+              }))}
+            />
+          </label>
+        </form>
+      </Modal>
     </section>
   );
 }

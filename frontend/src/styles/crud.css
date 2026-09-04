@@ -368,3 +368,120 @@
 .attendance-absent-note {
   margin: -4px 0 4px;
 }
+
+/* COMMIT 12 - SHARED INTERACTION POLISH */
+.primary-button,
+.secondary-button,
+.danger-button,
+.icon-button,
+.logout-button,
+.mobile-menu-button {
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.primary-button:not(:disabled):active,
+.secondary-button:not(:disabled):active,
+.danger-button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.modal-card:focus {
+  outline: none;
+}
+
+.modal-header h2 {
+  color: #172033;
+}
+
+.action-dialog-content {
+  display: grid;
+  gap: 16px;
+}
+
+.action-dialog-message {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.action-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.action-dialog-field textarea {
+  width: 100%;
+  min-height: 104px;
+  padding: 10px 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  outline: none;
+  resize: vertical;
+}
+
+.action-dialog-field textarea:focus {
+  border-color: #475569;
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.08);
+}
+
+.action-dialog-error {
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .toolbar-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-card .control,
+  .toolbar-card .primary-button,
+  .toolbar-card .secondary-button,
+  .toolbar-card .danger-button {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .modal-card,
+  .modal-wide {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    border-radius: 14px 14px 10px 10px;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 14px 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .modal-footer > button {
+    flex: 1 1 140px;
+  }
+
+  .row-actions:not(.row-actions-wrap) {
+    flex-wrap: wrap;
+  }
+}

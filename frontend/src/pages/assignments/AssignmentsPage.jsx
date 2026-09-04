@@ -8,6 +8,7 @@ import {
 import { getEmployees } from '../../api/employeeApi';
 import { getShifts } from '../../api/shiftApi';
 import AreaTableManager from '../../components/assignments/AreaTableManager';
+import ActionDialog from '../../components/common/ActionDialog';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -35,6 +36,7 @@ function AssignmentsPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   const loadData = async () => {
     try {
@@ -142,15 +144,12 @@ function AssignmentsPage() {
     }
   };
 
-  const handleCancel = async (assignment) => {
-    const reason = window.prompt('Nhập lý do hủy phân công:');
+  const handleCancel = (assignment) => {
+    setCancelTarget(assignment);
+  };
 
-    if (reason === null) {
-      return;
-    }
-
-    if (!reason.trim()) {
-      setError('Bắt buộc nhập lý do hủy phân công.');
+  const confirmCancel = async (reason) => {
+    if (!cancelTarget) {
       return;
     }
 
@@ -159,7 +158,8 @@ function AssignmentsPage() {
       setError('');
       setNotice('');
 
-      await cancelAssignment(assignment.id, reason.trim());
+      await cancelAssignment(cancelTarget.id, reason);
+      setCancelTarget(null);
       setNotice('Đã hủy phân công.');
       await loadData();
     } catch (err) {
@@ -419,6 +419,23 @@ function AssignmentsPage() {
           </label>
         </form>
       </Modal>
+
+      <ActionDialog
+        open={Boolean(cancelTarget)}
+        title="Hủy phân công"
+        message={cancelTarget
+          ? `Hủy phân công của ${cancelTarget.employeeName} khỏi ca "${cancelTarget.shiftName}"?`
+          : ''}
+        inputLabel="Lý do hủy"
+        inputPlaceholder="Nhập lý do để lưu vào lịch sử phân công..."
+        required
+        danger
+        confirmLabel="Hủy phân công"
+        saving={saving}
+        error={error}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={confirmCancel}
+      />
     </section>
   );
 }

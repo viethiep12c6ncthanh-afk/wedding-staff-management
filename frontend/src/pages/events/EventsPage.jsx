@@ -7,6 +7,7 @@ import {
   updateEvent,
 } from '../../api/eventApi';
 import { getVenues } from '../../api/venueApi';
+import ActionDialog from '../../components/common/ActionDialog';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -52,6 +53,7 @@ function EventsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   const loadData = async () => {
     try {
@@ -169,32 +171,15 @@ function EventsPage() {
     }
   };
 
-  const handleTransition = async (event, target) => {
-    let reason = null;
-
-    if (target === 'CANCELLED') {
-      reason = window.prompt('Nhập lý do hủy sự kiện:');
-
-      if (reason === null) {
-        return;
-      }
-
-      if (!reason.trim()) {
-        setError('Bắt buộc nhập lý do hủy sự kiện.');
-        return;
-      }
-    }
-
+  const applyTransition = async (event, target, reason = null) => {
     try {
+      setSaving(true);
       setError('');
       setNotice('');
 
-      await changeEventStatus(
-        event.id,
-        target,
-        reason?.trim() || null,
-      );
+      await changeEventStatus(event.id, target, reason || null);
 
+      setCancelTarget(null);
       setNotice(`Đã cập nhật trạng thái sự kiện: ${transitionLabels[target]}.`);
       await loadData();
     } catch (err) {
@@ -204,7 +189,18 @@ function EventsPage() {
           'Không thể chuyển trạng thái sự kiện.',
         ),
       );
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleTransition = (event, target) => {
+    if (target === 'CANCELLED') {
+      setCancelTarget(event);
+      return;
+    }
+
+    applyTransition(event, target);
   };
 
   return (
@@ -434,6 +430,22 @@ function EventsPage() {
           </label>
         </form>
       </Modal>
+
+      <ActionDialog
+        open={Boolean(cancelTarget)}
+        title="Hủy sự kiện"
+        message={cancelTarget
+          ? `Hủy sự kiện "${cancelTarget.name}"? Các ca chưa hoàn thành liên quan có thể bị hủy theo quy tắc hệ thống.`
+          : ''}
+        inputLabel="Lý do hủy"
+        required
+        danger
+        confirmLabel="Hủy sự kiện"
+        saving={saving}
+        error={error}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={(reason) => applyTransition(cancelTarget, 'CANCELLED', reason)}
+      />
     </section>
   );
 }

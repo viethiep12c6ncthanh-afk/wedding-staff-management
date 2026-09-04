@@ -10,6 +10,7 @@ import {
 } from '../../api/attendanceApi';
 import EmployeeSelfAttendance from '../../components/attendance/EmployeeSelfAttendance';
 import QrSessionManager from '../../components/attendance/QrSessionManager';
+import ActionDialog from '../../components/common/ActionDialog';
 import Modal from '../../components/common/Modal';
 import StatusBadge from '../../components/common/StatusBadge';
 import { getApiErrorMessage } from '../../utils/apiError';
@@ -51,6 +52,7 @@ function AttendancePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [confirmTarget, setConfirmTarget] = useState(null);
 
   const loadData = async () => {
     try {
@@ -184,8 +186,12 @@ function AttendancePage() {
     }
   };
 
-  const handleConfirm = async (attendance) => {
-    if (!window.confirm('Xác nhận chấm công này? Sau đó sẽ không thể sửa.')) {
+  const handleConfirm = (attendance) => {
+    setConfirmTarget(attendance);
+  };
+
+  const confirmAttendanceRecord = async () => {
+    if (!confirmTarget) {
       return;
     }
 
@@ -194,7 +200,8 @@ function AttendancePage() {
       setError('');
       setNotice('');
 
-      await confirmAttendance(attendance.id);
+      await confirmAttendance(confirmTarget.id);
+      setConfirmTarget(null);
       setNotice('Đã xác nhận chấm công và chốt tiền công.');
       await loadData();
     } catch (err) {
@@ -460,6 +467,19 @@ function AttendancePage() {
           </label>
         </form>
       </Modal>
+
+      <ActionDialog
+        open={Boolean(confirmTarget)}
+        title="Xác nhận chấm công"
+        message={confirmTarget
+          ? `Xác nhận chấm công của ${confirmTarget.employeeName || 'nhân viên'} cho ca "${confirmTarget.shiftName}"? Sau bước này bản ghi và snapshot tiền công sẽ không thể sửa.`
+          : ''}
+        confirmLabel="Xác nhận & chốt tiền công"
+        saving={saving}
+        error={error}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={confirmAttendanceRecord}
+      />
     </section>
   );
 }

@@ -5,6 +5,7 @@ import {
   revokeAttendanceCheckSession,
 } from '../../api/qrAttendanceApi';
 import { getShifts } from '../../api/shiftApi';
+import ActionDialog from '../common/ActionDialog';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { formatDateTime } from '../../utils/formatters';
 import { buildAttendanceQrPayload } from '../../utils/qrAttendance';
@@ -50,6 +51,7 @@ function QrSessionManager() {
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [revokeOpen, setRevokeOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -187,6 +189,7 @@ function QrSessionManager() {
       setNotice('');
       await revokeAttendanceCheckSession(session.sessionId);
       setSession(null);
+      setRevokeOpen(false);
       setNotice('Đã thu hồi phiên chấm công.');
     } catch (err) {
       setError(getApiErrorMessage(err, 'Không thể thu hồi phiên chấm công.'));
@@ -394,7 +397,7 @@ function QrSessionManager() {
                 <button
                   type="button"
                   className="danger-button"
-                  onClick={handleRevoke}
+                  onClick={() => setRevokeOpen(true)}
                   disabled={saving}
                 >
                   Thu hồi phiên
@@ -408,6 +411,20 @@ function QrSessionManager() {
           )}
         </div>
       </div>
+
+      <ActionDialog
+        open={revokeOpen}
+        title="Thu hồi phiên chấm công"
+        message={session
+          ? `Thu hồi phiên ${actionLabels[session.action]} của ca #${session.shiftId}? QR và OTP hiện tại sẽ mất hiệu lực ngay.`
+          : ''}
+        danger
+        confirmLabel="Thu hồi phiên"
+        saving={saving}
+        error={error}
+        onClose={() => setRevokeOpen(false)}
+        onConfirm={handleRevoke}
+      />
     </section>
   );
 }
