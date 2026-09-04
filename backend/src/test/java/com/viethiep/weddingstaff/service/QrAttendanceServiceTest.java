@@ -332,6 +332,147 @@ class QrAttendanceServiceTest {
         verifyNoInteractions(attendanceService);
     }
 
+
+    @Test
+    void rejectsOneSidedCoordinatesEvenWhenSessionDoesNotRequireGps() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.checkIn(
+                        new SelfAttendanceRequest(
+                                3L,
+                                "qr-token",
+                                null,
+                                10.7769,
+                                null
+                        ),
+                        "employee"
+                )
+        );
+
+        assertEquals(
+                "Latitude và longitude phải được cung cấp cùng nhau",
+                ex.getMessage()
+        );
+        verifyNoInteractions(
+                sessionRepository,
+                eventRepository,
+                assignmentRepository,
+                attendanceService
+        );
+    }
+
+    @Test
+    void nonGpsSessionDoesNotPersistOptionalCoordinates() {
+        LocalDateTime now = LocalDateTime.now();
+        WorkShift shift = shift(now.minusMinutes(5), now.plusHours(2));
+        String rawToken = "privacy-test-token";
+
+        AttendanceCheckSession session = session(
+                25L,
+                shift,
+                AttendanceCheckAction.CHECK_IN,
+                sha256(rawToken),
+                now.minusMinutes(1),
+                now.plusMinutes(9)
+        );
+        ShiftAssignment assignment = assignment(13L, shift, "employee");
+
+        when(sessionRepository.findByTokenHashForUpdate(sha256(rawToken)))
+                .thenReturn(Optional.of(session));
+        when(assignmentRepository.findOwnedActiveForUpdate(
+                eq(3L),
+                eq("employee"),
+                anyCollection()
+        )).thenReturn(Optional.of(assignment));
+        when(attendanceService.selfCheckIn(
+                eq(assignment),
+                eq(assignment.getEmployee().getUser()),
+                any(LocalDateTime.class)
+        )).thenReturn(attendanceResponse(33L));
+        when(eventRepository.existsByAttendanceIdAndAction(
+                33L,
+                AttendanceCheckAction.CHECK_IN
+        )).thenReturn(false);
+
+        QrAttendanceResultResponse response = service.checkIn(
+                new SelfAttendanceRequest(
+                        3L,
+                        rawToken,
+                        null,
+                        10.7769,
+                        106.7009
+                ),
+                "employee"
+        );
+
+        assertFalse(response.gpsVerified());
+        assertNull(response.distanceMeters());
+
+        verify(eventRepository).save(argThat(event ->
+                event.getLatitude() == null
+                        && event.getLongitude() == null
+                        && event.getDistanceMeters() == null
+        ));
+    }
+
+    @Test
+    void gpsSessionPersistsVerifiedCoordinates() {
+        LocalDateTime now = LocalDateTime.now();
+        WorkShift shift = shift(now.minusMinutes(5), now.plusHours(2));
+        String rawToken = "gps-inside-token";
+
+        AttendanceCheckSession session = session(
+                26L,
+                shift,
+                AttendanceCheckAction.CHECK_IN,
+                sha256(rawToken),
+                now.minusMinutes(1),
+                now.plusMinutes(9)
+        );
+        session.setLatitude(new BigDecimal("10.776900"));
+        session.setLongitude(new BigDecimal("106.700900"));
+        session.setRadiusMeters(150);
+
+        ShiftAssignment assignment = assignment(14L, shift, "employee");
+
+        when(sessionRepository.findByTokenHashForUpdate(sha256(rawToken)))
+                .thenReturn(Optional.of(session));
+        when(assignmentRepository.findOwnedActiveForUpdate(
+                eq(3L),
+                eq("employee"),
+                anyCollection()
+        )).thenReturn(Optional.of(assignment));
+        when(attendanceService.selfCheckIn(
+                eq(assignment),
+                eq(assignment.getEmployee().getUser()),
+                any(LocalDateTime.class)
+        )).thenReturn(attendanceResponse(34L));
+        when(eventRepository.existsByAttendanceIdAndAction(
+                34L,
+                AttendanceCheckAction.CHECK_IN
+        )).thenReturn(false);
+
+        QrAttendanceResultResponse response = service.checkIn(
+                new SelfAttendanceRequest(
+                        3L,
+                        rawToken,
+                        null,
+                        10.7769,
+                        106.7009
+                ),
+                "employee"
+        );
+
+        assertTrue(response.gpsVerified());
+        assertEquals(0, response.distanceMeters());
+
+        verify(eventRepository).save(argThat(event ->
+                new BigDecimal("10.776900").equals(event.getLatitude())
+                        && new BigDecimal("106.700900").equals(event.getLongitude())
+                        && Integer.valueOf(0).equals(event.getDistanceMeters())
+        ));
+    }
+
     private WorkShift shift(
             LocalDateTime startAt,
             LocalDateTime endAt

@@ -321,12 +321,10 @@ public class ReplacementService {
             Employee candidate,
             WorkShift shift
     ) {
-        if (candidate.getEmploymentStatus() != EmployeeStatus.ACTIVE) {
-            throw new IllegalStateException("Hồ sơ nhân viên đang không hoạt động");
-        }
         if (candidate.getId().equals(request.getOriginalAssignment().getEmployee().getId())) {
             throw new IllegalStateException("Không thể mời chính nhân viên đang xin thay ca");
         }
+        ensureCandidateAccountEligible(candidate);
         if (assignmentRepository.existsByShiftIdAndEmployeeIdAndStatusIn(
                 shift.getId(),
                 candidate.getId(),
@@ -341,6 +339,24 @@ public class ReplacementService {
                 ACTIVE_ASSIGNMENT_STATUSES
         ).isEmpty()) {
             throw new IllegalStateException("Nhân viên bị trùng với ca đã được phân công");
+        }
+    }
+
+    private void ensureCandidateAccountEligible(Employee candidate) {
+        if (candidate.getEmploymentStatus() != EmployeeStatus.ACTIVE) {
+            throw new IllegalStateException("Hồ sơ nhân viên đang không hoạt động");
+        }
+
+        UserAccount account = candidate.getUser();
+        if (account == null || account.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new IllegalStateException("Tài khoản nhân viên đang không hoạt động");
+        }
+
+        if (account.getRole() == null
+                || account.getRole().getName() != RoleName.EMPLOYEE) {
+            throw new IllegalStateException(
+                    "Tài khoản nhân viên thay ca phải có vai trò EMPLOYEE"
+            );
         }
     }
 

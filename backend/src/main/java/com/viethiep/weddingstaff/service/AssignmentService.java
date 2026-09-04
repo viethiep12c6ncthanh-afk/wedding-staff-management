@@ -11,7 +11,9 @@ import com.viethiep.weddingstaff.entity.UserAccount;
 import com.viethiep.weddingstaff.entity.WorkShift;
 import com.viethiep.weddingstaff.enumtype.AssignmentSource;
 import com.viethiep.weddingstaff.enumtype.AssignmentStatus;
+import com.viethiep.weddingstaff.enumtype.AccountStatus;
 import com.viethiep.weddingstaff.enumtype.EmployeeStatus;
+import com.viethiep.weddingstaff.enumtype.RoleName;
 import com.viethiep.weddingstaff.enumtype.ShiftStatus;
 import com.viethiep.weddingstaff.repository.EmployeeRepository;
 import com.viethiep.weddingstaff.repository.ShiftAssignmentRepository;
@@ -66,15 +68,11 @@ public class AssignmentService {
         validateShiftAssignable(shift);
 
         Employee employee = employeeRepository
-                .findById(request.employeeId())
+                .findByIdWithUser(request.employeeId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Không tìm thấy nhân viên")
                 );
-        if (employee.getEmploymentStatus() != EmployeeStatus.ACTIVE) {
-            throw new IllegalStateException(
-                    "Hồ sơ nhân viên đang không hoạt động"
-            );
-        }
+        ensureEmployeeAssignable(employee);
 
         ensureCapacity(shift);
         ensureNoSameShiftAssignment(shift.getId(), employee.getId());
@@ -157,6 +155,28 @@ public class AssignmentService {
                 && shift.getShiftStatus() != ShiftStatus.CLOSED) {
             throw new IllegalStateException(
                     "Chỉ phân công khi ca đang mở hoặc đã đóng đăng ký"
+            );
+        }
+    }
+
+    private void ensureEmployeeAssignable(Employee employee) {
+        if (employee.getEmploymentStatus() != EmployeeStatus.ACTIVE) {
+            throw new IllegalStateException(
+                    "Hồ sơ nhân viên đang không hoạt động"
+            );
+        }
+
+        UserAccount account = employee.getUser();
+        if (account == null || account.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new IllegalStateException(
+                    "Tài khoản nhân viên đang không hoạt động"
+            );
+        }
+
+        if (account.getRole() == null
+                || account.getRole().getName() != RoleName.EMPLOYEE) {
+            throw new IllegalStateException(
+                    "Tài khoản được phân công phải có vai trò EMPLOYEE"
             );
         }
     }

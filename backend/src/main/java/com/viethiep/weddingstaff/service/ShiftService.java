@@ -200,7 +200,7 @@ public class ShiftService {
     }
 
     private WorkShift findShift(Long id) {
-        return shiftRepository.findById(id)
+        return shiftRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Không tìm thấy ca")
                 );

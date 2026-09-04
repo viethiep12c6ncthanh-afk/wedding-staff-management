@@ -188,6 +188,7 @@ public class QrAttendanceService {
             String employeeUsername,
             AttendanceCheckAction expectedAction
     ) {
+        validateCoordinatePair(request.latitude(), request.longitude());
         Credential credential = validateCredential(request);
         LocalDateTime now = LocalDateTime.now();
 
@@ -236,6 +237,8 @@ public class QrAttendanceService {
                 ? AttendanceCheckMethod.QR
                 : AttendanceCheckMethod.OTP;
 
+        boolean gpsRequired = session.getLatitude() != null;
+
         eventRepository.save(
                 AttendanceCheckEvent.builder()
                         .attendanceId(attendance.id())
@@ -244,8 +247,12 @@ public class QrAttendanceService {
                         .action(expectedAction)
                         .method(method)
                         .occurredAt(now)
-                        .latitude(toCoordinate(request.latitude()))
-                        .longitude(toCoordinate(request.longitude()))
+                        .latitude(gpsRequired
+                                ? toCoordinate(request.latitude())
+                                : null)
+                        .longitude(gpsRequired
+                                ? toCoordinate(request.longitude())
+                                : null)
                         .distanceMeters(distanceMeters)
                         .build()
         );
@@ -367,6 +374,17 @@ public class QrAttendanceService {
                         ? DEFAULT_RADIUS_METERS
                         : radiusMeters
         );
+    }
+
+    private void validateCoordinatePair(
+            Double latitude,
+            Double longitude
+    ) {
+        if ((latitude == null) != (longitude == null)) {
+            throw new IllegalArgumentException(
+                    "Latitude và longitude phải được cung cấp cùng nhau"
+            );
+        }
     }
 
     private Integer validateGps(

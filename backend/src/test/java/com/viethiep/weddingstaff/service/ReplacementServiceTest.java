@@ -325,6 +325,75 @@ class ReplacementServiceTest {
         assertEquals(ReplacementInvitationStatus.CANCELLED, otherPending.getStatus());
     }
 
+
+    @Test
+    void managerCannotInviteEmployeeWithInactiveAccount() {
+        ReplacementRequest request =
+                openableRequest(58L, ReplacementRequestStatus.OPEN);
+        Employee candidate = candidate(
+                21L,
+                "candidate",
+                null,
+                RoleName.EMPLOYEE
+        );
+
+        when(requestRepository.findByIdForUpdate(58L))
+                .thenReturn(Optional.of(request));
+        when(shiftRepository.findByIdForUpdate(3L))
+                .thenReturn(Optional.of(shift));
+        when(employeeRepository.findByIdWithUser(21L))
+                .thenReturn(Optional.of(candidate));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> service.inviteEmployee(
+                        58L,
+                        new InviteReplacementRequest(21L),
+                        "admin"
+                )
+        );
+
+        assertEquals(
+                "Tài khoản nhân viên đang không hoạt động",
+                ex.getMessage()
+        );
+        verify(invitationRepository, never()).save(any());
+    }
+
+    @Test
+    void managerCannotInviteAccountWithoutEmployeeRole() {
+        ReplacementRequest request =
+                openableRequest(59L, ReplacementRequestStatus.OPEN);
+        Employee candidate = candidate(
+                21L,
+                "candidate",
+                AccountStatus.ACTIVE,
+                RoleName.COORDINATOR
+        );
+
+        when(requestRepository.findByIdForUpdate(59L))
+                .thenReturn(Optional.of(request));
+        when(shiftRepository.findByIdForUpdate(3L))
+                .thenReturn(Optional.of(shift));
+        when(employeeRepository.findByIdWithUser(21L))
+                .thenReturn(Optional.of(candidate));
+
+        IllegalStateException ex = assertThrows(
+                IllegalStateException.class,
+                () -> service.inviteEmployee(
+                        59L,
+                        new InviteReplacementRequest(21L),
+                        "admin"
+                )
+        );
+
+        assertEquals(
+                "Tài khoản nhân viên thay ca phải có vai trò EMPLOYEE",
+                ex.getMessage()
+        );
+        verify(invitationRepository, never()).save(any());
+    }
+
     @Test
     void shiftCancellationClosesPendingAndOpenReplacementRequests() {
         ReplacementRequest pending = openableRequest(56L, ReplacementRequestStatus.PENDING);
@@ -361,6 +430,20 @@ class ReplacementServiceTest {
     }
 
     private Employee candidate(Long id, String username) {
+        return candidate(
+                id,
+                username,
+                AccountStatus.ACTIVE,
+                RoleName.EMPLOYEE
+        );
+    }
+
+    private Employee candidate(
+            Long id,
+            String username,
+            AccountStatus accountStatus,
+            RoleName roleName
+    ) {
         return Employee.builder()
                 .id(id)
                 .employeeCode("NV" + id)
@@ -369,6 +452,8 @@ class ReplacementServiceTest {
                         .id(id + 100)
                         .username(username)
                         .fullName("Nhân viên " + username)
+                        .accountStatus(accountStatus)
+                        .role(Role.builder().name(roleName).build())
                         .build())
                 .build();
     }
