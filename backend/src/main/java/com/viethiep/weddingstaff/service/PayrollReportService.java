@@ -77,17 +77,33 @@ public class PayrollReportService {
         long paidShiftCount = 0;
         long absentShiftCount = 0;
         BigDecimal totalBasePay = ZERO;
+        BigDecimal totalLeaderAllowance = ZERO;
+        BigDecimal totalLateDeduction = ZERO;
+        BigDecimal totalEarlyLeaveDeduction = ZERO;
+        BigDecimal totalOvertimePay = ZERO;
         BigDecimal totalPayable = ZERO;
 
         for (Attendance attendance : attendances) {
-            BigDecimal basePay = zeroIfNull(
-                    attendance.getBasePaySnapshot()
+            BigDecimal basePay = zeroIfNull(attendance.getBasePaySnapshot());
+            BigDecimal leaderAllowance = zeroIfNull(
+                    attendance.getLeaderAllowanceSnapshot()
             );
-            BigDecimal payable = zeroIfNull(
-                    attendance.getPayableAmount()
+            BigDecimal lateDeduction = zeroIfNull(
+                    attendance.getLateDeductionSnapshot()
             );
+            BigDecimal earlyLeaveDeduction = zeroIfNull(
+                    attendance.getEarlyLeaveDeductionSnapshot()
+            );
+            BigDecimal overtimePay = zeroIfNull(
+                    attendance.getOvertimePaySnapshot()
+            );
+            BigDecimal payable = zeroIfNull(attendance.getPayableAmount());
 
             totalBasePay = totalBasePay.add(basePay);
+            totalLeaderAllowance = totalLeaderAllowance.add(leaderAllowance);
+            totalLateDeduction = totalLateDeduction.add(lateDeduction);
+            totalEarlyLeaveDeduction = totalEarlyLeaveDeduction.add(earlyLeaveDeduction);
+            totalOvertimePay = totalOvertimePay.add(overtimePay);
             totalPayable = totalPayable.add(payable);
 
             boolean absent = attendance.getAttendanceResult()
@@ -98,20 +114,25 @@ public class PayrollReportService {
                 paidShiftCount++;
             }
 
-            Employee employee =
-                    attendance.getAssignment().getEmployee();
-
-            EmployeeAccumulator accumulator =
-                    byEmployee.computeIfAbsent(
+            Employee employee = attendance.getAssignment().getEmployee();
+            EmployeeAccumulator accumulator = byEmployee.computeIfAbsent(
+                    employee.getId(),
+                    ignored -> new EmployeeAccumulator(
                             employee.getId(),
-                            ignored -> new EmployeeAccumulator(
-                                    employee.getId(),
-                                    employee.getEmployeeCode(),
-                                    employee.getUser().getFullName()
-                            )
-                    );
+                            employee.getEmployeeCode(),
+                            employee.getUser().getFullName()
+                    )
+            );
 
-            accumulator.add(basePay, payable, absent);
+            accumulator.add(
+                    basePay,
+                    leaderAllowance,
+                    lateDeduction,
+                    earlyLeaveDeduction,
+                    overtimePay,
+                    payable,
+                    absent
+            );
         }
 
         List<PayrollEmployeeSummary> employees =
@@ -126,6 +147,10 @@ public class PayrollReportService {
                 paidShiftCount,
                 absentShiftCount,
                 totalBasePay,
+                totalLeaderAllowance,
+                totalLateDeduction,
+                totalEarlyLeaveDeduction,
+                totalOvertimePay,
                 totalPayable,
                 employees
         );
@@ -152,6 +177,10 @@ public class PayrollReportService {
         private long paidShiftCount;
         private long absentShiftCount;
         private BigDecimal totalBasePay = ZERO;
+        private BigDecimal totalLeaderAllowance = ZERO;
+        private BigDecimal totalLateDeduction = ZERO;
+        private BigDecimal totalEarlyLeaveDeduction = ZERO;
+        private BigDecimal totalOvertimePay = ZERO;
         private BigDecimal totalPayable = ZERO;
 
         private EmployeeAccumulator(
@@ -166,11 +195,19 @@ public class PayrollReportService {
 
         private void add(
                 BigDecimal basePay,
+                BigDecimal leaderAllowance,
+                BigDecimal lateDeduction,
+                BigDecimal earlyLeaveDeduction,
+                BigDecimal overtimePay,
                 BigDecimal payable,
                 boolean absent
         ) {
             confirmedShiftCount++;
             totalBasePay = totalBasePay.add(basePay);
+            totalLeaderAllowance = totalLeaderAllowance.add(leaderAllowance);
+            totalLateDeduction = totalLateDeduction.add(lateDeduction);
+            totalEarlyLeaveDeduction = totalEarlyLeaveDeduction.add(earlyLeaveDeduction);
+            totalOvertimePay = totalOvertimePay.add(overtimePay);
             totalPayable = totalPayable.add(payable);
 
             if (absent) {
@@ -189,6 +226,10 @@ public class PayrollReportService {
                     paidShiftCount,
                     absentShiftCount,
                     totalBasePay,
+                    totalLeaderAllowance,
+                    totalLateDeduction,
+                    totalEarlyLeaveDeduction,
+                    totalOvertimePay,
                     totalPayable
             );
         }

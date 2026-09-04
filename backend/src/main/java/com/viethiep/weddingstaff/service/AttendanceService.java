@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
@@ -31,6 +30,8 @@ import java.util.List;
 public class AttendanceService {
     private static final EnumSet<AssignmentStatus> ATTENDABLE_STATUSES =
             EnumSet.of(AssignmentStatus.ASSIGNED, AssignmentStatus.CONFIRMED);
+    private static final PayrollCalculator PAYROLL_CALCULATOR =
+            new PayrollCalculator();
 
     private final AttendanceRepository attendanceRepository;
     private final ShiftAssignmentRepository assignmentRepository;
@@ -144,17 +145,20 @@ public class AttendanceService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        BigDecimal basePay = assignment.getShift().getPayAmount();
-        BigDecimal payable = attendance.getAttendanceResult()
-                == AttendanceResult.ABSENT
-                ? BigDecimal.ZERO.setScale(basePay.scale())
-                : basePay;
+        PayrollCalculator.Result payroll =
+                PAYROLL_CALCULATOR.calculate(assignment, attendance);
 
         attendance.setProcessStatus(AttendanceProcessStatus.CONFIRMED);
         attendance.setConfirmedBy(confirmer);
         attendance.setConfirmedAt(now);
-        attendance.setBasePaySnapshot(basePay);
-        attendance.setPayableAmount(payable);
+        attendance.setBasePaySnapshot(payroll.basePay());
+        attendance.setPayableAmount(payroll.payableAmount());
+        attendance.setPayrollPolicyVersion(payroll.policyVersion());
+        attendance.setLeaderAllowanceSnapshot(payroll.leaderAllowance());
+        attendance.setLateDeductionSnapshot(payroll.lateDeduction());
+        attendance.setEarlyLeaveDeductionSnapshot(payroll.earlyLeaveDeduction());
+        attendance.setOvertimeMinutesSnapshot(payroll.overtimeMinutes());
+        attendance.setOvertimePaySnapshot(payroll.overtimePay());
 
         assignment.setStatus(
                 attendance.getAttendanceResult() == AttendanceResult.ABSENT

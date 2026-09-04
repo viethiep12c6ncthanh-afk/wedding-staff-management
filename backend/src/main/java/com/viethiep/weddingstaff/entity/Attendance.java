@@ -73,4 +73,22 @@ public class Attendance extends BaseEntity {
 
     @Column(precision = 12, scale = 2)
     private BigDecimal payableAmount;
+
+    @Column(name = "payroll_policy_version", length = 40)
+    private String payrollPolicyVersion;
+
+    @Column(name = "leader_allowance_snapshot", precision = 12, scale = 2)
+    private BigDecimal leaderAllowanceSnapshot;
+
+    @Column(name = "late_deduction_snapshot", precision = 12, scale = 2)
+    private BigDecimal lateDeductionSnapshot;
+
+    @Column(name = "early_leave_deduction_snapshot", precision = 12, scale = 2)
+    private BigDecimal earlyLeaveDeductionSnapshot;
+
+    @Column(name = "overtime_minutes_snapshot")
+    private Integer overtimeMinutesSnapshot;
+
+    @Column(name = "overtime_pay_snapshot", precision = 12, scale = 2)
+    private BigDecimal overtimePaySnapshot;
 }
