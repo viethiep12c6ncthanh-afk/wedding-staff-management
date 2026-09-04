@@ -45,6 +45,24 @@ public interface WorkShiftRepository extends JpaRepository<WorkShift, Long> {
             @Param("statuses") Collection<ShiftStatus> statuses
     );
 
+    @Query("""
+            select shift
+            from WorkShift shift
+            join fetch shift.event event
+            join fetch event.venue venue
+            where shift.startAt >= :fromAt
+              and shift.startAt < :toExclusive
+              and shift.shiftStatus in :statuses
+              and (:venueId is null or venue.id = :venueId)
+            order by shift.startAt asc, shift.id asc
+            """)
+    List<WorkShift> findForDashboardRange(
+            @Param("fromAt") LocalDateTime fromAt,
+            @Param("toExclusive") LocalDateTime toExclusive,
+            @Param("venueId") Long venueId,
+            @Param("statuses") Collection<ShiftStatus> statuses
+    );
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select shift

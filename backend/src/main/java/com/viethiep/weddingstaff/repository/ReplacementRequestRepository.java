@@ -97,4 +97,23 @@ public interface ReplacementRequestRepository
             where request.id = :id
             """)
     Optional<ReplacementRequest> findByIdForUpdate(@Param("id") Long id);
+
+    @Query("""
+            select request
+            from ReplacementRequest request
+            join fetch request.originalAssignment original
+            join fetch original.shift shift
+            join fetch shift.event event
+            join fetch event.venue venue
+            where shift.startAt >= :fromAt
+              and shift.startAt < :toExclusive
+              and (:venueId is null or venue.id = :venueId)
+            order by request.createdAt desc, request.id desc
+            """)
+    List<ReplacementRequest> findForDashboard(
+            @Param("fromAt") java.time.LocalDateTime fromAt,
+            @Param("toExclusive") java.time.LocalDateTime toExclusive,
+            @Param("venueId") Long venueId
+    );
+
 }
