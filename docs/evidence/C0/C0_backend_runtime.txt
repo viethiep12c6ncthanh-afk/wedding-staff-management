@@ -1,0 +1,13 @@
+=== C0 Backend Runtime Evidence ===
+Captured: 2026-09-08 16:58:05
+
+Port 8080 PID: 2492
+
+
+
+ProcessId      : 2492
+Name           : java.exe
+ExecutablePath : C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot\bin\java.exe
+CommandLine    : "C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot\bin\java.exe" -XX:TieredStopAtLevel=1 -cp
+                 @C:\Users\hieptong\AppData\Local\Temp\spring-boot-13925491487719922868.argfile
+                 com.viethiep.weddingstaff.WeddingStaffApplication

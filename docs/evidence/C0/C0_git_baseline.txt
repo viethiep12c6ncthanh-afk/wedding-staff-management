@@ -1,0 +1,11 @@
+=== C0 Git Baseline Evidence ===
+Captured: 2026-09-08 16:48:17
+Repo: D:/DoAn/wedding-staff-management
+Branch: main
+HEAD: 06819903a6d390556bbcdf73728e040052a97d2f
+HEAD short: 0681990
+Release commit: ca6f69e442e2bd14be9778328a591466a885c9ed
+Release tag: ca6f69e442e2bd14be9778328a591466a885c9ed
+Working tree:
+
+Diff main..dacn-v1.0.0:

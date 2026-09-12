@@ -1,0 +1,12 @@
+=== C0 Frontend Runtime Evidence ===
+Captured: 2026-09-08 17:25:48
+
+Port 5173 PID: 20452
+
+
+
+ProcessId       : 20452
+ParentProcessId : 21432
+Name            : node.exe
+ExecutablePath  : C:\Program Files\nodejs\node.exe
+CommandLine     : "node"   "D:\DoAn\wedding-staff-management\frontend\node_modules\.bin\\..\vite\bin\vite.js"

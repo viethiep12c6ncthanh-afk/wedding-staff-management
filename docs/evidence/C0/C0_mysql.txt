@@ -1,0 +1,20 @@
+=== C0 MySQL Evidence ===
+Captured: 2026-09-08 16:52:49
+
+Service:
+
+
+Name        : MySQL84
+DisplayName : MySQL84
+Status      : Running
+StartType   : Automatic
+
+
+
+
+
+Port 3306:
+
+LocalAddress LocalPort  State OwningProcess
+------------ ---------  ----- -------------
+::                3306 Listen          6268

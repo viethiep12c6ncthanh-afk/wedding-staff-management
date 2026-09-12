@@ -3,7 +3,7 @@
 Hệ thống quản lý ca làm và điều phối nhân sự phục vụ tiệc cưới, sự kiện đa địa điểm tích hợp AI.
 
 Bản này là kết quả phát triển **Đồ án chuyên ngành (DACN)** trên baseline DACS `dacs-v1.0.0`.
-Nhánh phát triển: `develop/dacn`. Release tag mục tiêu: `dacn-v1.0.0`.
+Nhánh nghiệm thu cuối: `main`. Tag `dacn-v1.0.0` được giữ nguyên như mốc release lịch sử; tag hiệu chỉnh cuối chỉ tạo sau khi C10 PASS.
 
 ## 1. Chức năng chính
 
@@ -292,6 +292,7 @@ Kịch bản chi tiết và dữ liệu cần chuẩn bị:
 - `docs/dacn/14_TEST_REPORT_DACN_v1.0.md`
 - `docs/dacn/14_RELEASE_DEMO_DACN_v1.0.md`
 - `docs/dacn/14_RELEASE_CHECKLIST_DACN_v1.0.md`
+- `docs/dacn/15_FINAL_ACCEPTANCE_DACN_v1.0.md`
 
 Postman:
 `docs/postman/Wedding_Staff_Management_DACN_v1.postman_collection.json`.
@@ -309,11 +310,18 @@ Postman:
 
 ## 14. Release
 
-Sau khi `14_RELEASE_CHECKLIST_DACN_v1.0.md` PASS:
+Trạng thái nghiệm thu cuối được tổng hợp tại:
+
+`docs/dacn/15_FINAL_ACCEPTANCE_DACN_v1.0.md`
+
+Tag `dacn-v1.0.0` là mốc release lịch sử và không được di chuyển.
+
+Sau khi C10 final gate PASS:
 
 ```bash
-git commit -m "release(dacn): finalize documentation demo and release"
-git tag dacn-v1.0.0
+git status --short
+git log -1 --oneline
+git tag dacn-v1.0.1
 ```
 
-Không tạo release tag trước khi working tree sạch và final regression PASS.
+Chỉ tạo tag mới khi backend regression, frontend production build và repository hygiene đều PASS.

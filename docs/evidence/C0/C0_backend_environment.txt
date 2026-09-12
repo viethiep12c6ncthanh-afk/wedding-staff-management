@@ -1,0 +1,24 @@
+=== C0 Backend Environment Evidence ===
+Captured: 2026-09-08 17:29:43
+
+Verified startup sequence:
+$env:DB_USERNAME = "root"
+$env:SPRING_PROFILES_ACTIVE = "dev"
+$env:JPA_DDL_AUTO = "validate"
+$env:AI_ENABLED = "false"
+mvn spring-boot:run
+
+Resolved runtime configuration:
+DB_USERNAME=root
+SPRING_PROFILES_ACTIVE=dev
+JPA_DDL_AUTO=validate
+AI_ENABLED=false
+Backend port=8080
+
+Source configuration:
+SPRING_PROFILES_ACTIVE default=dev
+DB_USERNAME default=root
+AI_ENABLED default=false
+SERVER_PORT default=8080
+JPA_DDL_AUTO default=update
+Runtime override: JPA_DDL_AUTO=validate
