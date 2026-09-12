@@ -184,7 +184,7 @@ function ReportsPage() {
       <div className="report-note">
         Báo cáo chỉ tính các bản chấm công đã xác nhận.
         Khoảng ngày được lọc theo ngày bắt đầu ca làm.
-        Dữ liệu cũ giữ nguyên chính sách tiền công đã chốt trước Commit 10.
+        Dữ liệu đã xác nhận được giữ nguyên theo chính sách tiền công tại thời điểm chốt.
       </div>
 
       {error && <div className="error-box">{error}</div>}

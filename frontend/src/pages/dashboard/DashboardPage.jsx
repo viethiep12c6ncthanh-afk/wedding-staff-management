@@ -487,7 +487,7 @@ function DashboardPage() {
 
       <SectionHeader
         title="Tiền công"
-        subtitle="Tái sử dụng snapshot payroll đã xác nhận ở Commit 10."
+        subtitle="Dữ liệu tiền công được tổng hợp từ các bảng chấm công đã xác nhận."
       />
 
       <div className="stats-grid dashboard-stats-grid">

@@ -72,6 +72,16 @@ function ReplacementPage() {
         const openRequests = requestData.filter((item) => item.status === 'OPEN');
         const candidateResults = await Promise.all(
           openRequests.map(async (item) => {
+            const shiftStarted = new Date(item.startAt).getTime() <= Date.now();
+
+            if (shiftStarted) {
+              return {
+                requestId: item.id,
+                candidates: [],
+                error: 'Không thể gợi ý ứng viên khi ca đã bắt đầu',
+              };
+            }
+
             try {
               return {
                 requestId: item.id,
