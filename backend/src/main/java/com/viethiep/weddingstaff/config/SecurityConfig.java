@@ -4,6 +4,7 @@ import com.viethiep.weddingstaff.security.ApiAccessDeniedHandler;
 import com.viethiep.weddingstaff.security.ApiAuthenticationEntryPoint;
 import com.viethiep.weddingstaff.security.CustomUserDetailsService;
 import com.viethiep.weddingstaff.security.JwtAuthenticationFilter;
+import com.viethiep.weddingstaff.security.OperationalAuditFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OperationalAuditFilter operationalAuditFilter;
     private final CustomUserDetailsService userDetailsService;
     private final ApiAuthenticationEntryPoint authenticationEntryPoint;
     private final ApiAccessDeniedHandler accessDeniedHandler;
@@ -68,6 +70,7 @@ public class SecurityConfig {
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
+                .addFilterAfter(operationalAuditFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 }

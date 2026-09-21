@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import Sidebar from '../components/common/Sidebar';
+import NotificationBell from '../components/common/NotificationBell';
 
 const roleLabels = {
   ADMIN: 'Quản trị viên',
@@ -67,6 +68,7 @@ function MainLayout() {
           </div>
 
           <div className="topbar-user">
+            <NotificationBell />
             <div className="user-info">
               <strong>
                 {currentUser?.fullName ||

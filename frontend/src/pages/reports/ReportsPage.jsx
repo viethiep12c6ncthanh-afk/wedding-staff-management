@@ -119,6 +119,28 @@ function ReportsPage() {
     Number(report?.totalLateDeduction ?? 0) +
     Number(report?.totalEarlyLeaveDeduction ?? 0);
 
+  const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+
+  const exportExcel = () => {
+    if (!report) return;
+    const headers = ['Mã NV', 'Nhân viên', 'Ca xác nhận', 'Ca trả công', 'Ca vắng',
+      'Tiền cơ bản', 'Phụ cấp trưởng ca', 'Tăng ca', 'Trừ đi trễ', 'Trừ về sớm', 'Thực trả'];
+    const rows = employeeRows.map((employee) => [employee.employeeCode, employee.fullName,
+      employee.confirmedShiftCount, employee.paidShiftCount, employee.absentShiftCount,
+      employee.totalBasePay, employee.totalLeaderAllowance, employee.totalOvertimePay,
+      employee.totalLateDeduction, employee.totalEarlyLeaveDeduction, employee.totalPayable]);
+    const csv = [headers, ...rows].map((row) => row.map(escapeCsv).join(',')).join('\r\n');
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `bao-cao-tien-cong-${report.from || 'dau'}-${report.to || 'nay'}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPdf = () => window.print();
+
   return (
     <section>
       <div className="page-heading">
@@ -135,6 +157,16 @@ function ReportsPage() {
               : 'Tổng hợp tiền công từ các bản chấm công đã xác nhận.'}
           </p>
         </div>
+        {report && !loading && (
+          <div className="report-export-actions">
+            <button type="button" className="secondary-button" onClick={exportExcel}>
+              Xuất Excel (CSV)
+            </button>
+            <button type="button" className="secondary-button" onClick={exportPdf}>
+              Xuất PDF / In
+            </button>
+          </div>
+        )}
       </div>
 
       <form

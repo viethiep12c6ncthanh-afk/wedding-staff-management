@@ -4,6 +4,41 @@
   gap: 16px;
 }
 
+.replacement-ai-quick-test {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.replacement-ai-quick-test > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.replacement-ai-quick-test span {
+  color: #92400e;
+  font-size: 13px;
+}
+
+.replacement-ai-quick-result {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #fcd34d;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .replacement-ai-quick-test {
+    grid-template-columns: 1fr;
+  }
+}
+
 .replacement-form-card,
 .replacement-request-card {
   overflow: hidden;

@@ -23,6 +23,7 @@ import AttendancePage from './pages/attendance/AttendancePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import ReputationPage from './pages/reputation/ReputationPage';
 import ReplacementPage from './pages/replacements/ReplacementPage';
+import AuditPage from './pages/audit/AuditPage';
 
 import './styles/crud.css';
 import './styles/coordination.css';
@@ -83,6 +84,12 @@ function App() {
                 path="/assignments"
                 element={<AssignmentsPage />}
               />
+              <Route
+                path="/audit"
+                element={<RoleRoute allowedRoles={['ADMIN']} />}
+              >
+                <Route index element={<AuditPage />} />
+              </Route>
             </Route>
 
             <Route

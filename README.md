@@ -1,4 +1,4 @@
-# Wedding Staff Management System — DACN v1.0
+# Wedding Staff Management System — DACN v1.1
 
 Hệ thống quản lý ca làm và điều phối nhân sự phục vụ tiệc cưới, sự kiện đa địa điểm tích hợp AI.
 
@@ -25,9 +25,14 @@ Nhánh nghiệm thu cuối: `main`. Tag `dacn-v1.0.0` được giữ nguyên nh�
 - Hybrid AI recommendation: deterministic ranking -> LLM rerank/explain -> coordinator quyết định.
 - Ollama local mặc định; OpenAI là provider tùy chọn.
 - QR check-in/check-out, OTP fallback và GPS bán kính tùy chọn.
+- QR demo mode cho phép kiểm thử ngay mà không sửa giờ ca.
 - Phân khu vực/bàn có cấu trúc cho từng ca.
 - Tính công nhiều quy tắc: phụ cấp LEADER, đi trễ, về sớm, tăng ca, vắng mặt.
 - Dashboard vận hành, workforce, replacement, AI analytics và payroll.
+- Audit log tự động cho mọi API thay đổi dữ liệu, có màn hình tra cứu dành cho ADMIN.
+- Trung tâm thông báo vận hành gần thời gian thực (polling 10 giây, phân phạm vi theo vai trò).
+- Xuất báo cáo tiền công dạng CSV tương thích Excel và bản in/PDF từ trình duyệt.
+- Đóng gói Docker Compose cho MySQL, Spring Boot và React/Nginx.
 - Responsive UI, modal/dialog thống nhất và các trạng thái loading/error/disabled.
 
 ## 2. Vai trò
@@ -96,6 +101,7 @@ V009__ai_assisted_recommendation.sql
 V010__qr_otp_gps_attendance.sql
 V011__advanced_area_table_assignment.sql
 V012__multi_rule_payroll.sql
+V013__operational_audit.sql
 ```
 
 ### Database mới
@@ -150,6 +156,22 @@ AI_TIMEOUT_MS=60000
 AI_CANDIDATE_LIMIT=5
 AI_RECENT_EVALUATION_LIMIT=3
 ```
+
+Test nhanh QR và kiểm tra AI thật bằng Ollama:
+
+```text
+ATTENDANCE_DEMO_ENABLED=true
+AI_ENABLED=true
+AI_PROVIDER=OLLAMA
+AI_BASE_URL=http://localhost:11434
+AI_MODEL=qwen3:4b-instruct
+```
+
+Khởi động lại backend sau khi đổi biến môi trường. QR demo chỉ bỏ kiểm tra cửa
+sổ giờ; phân công, hạn phiên, QR/OTP, GPS và chống thao tác trùng vẫn được giữ.
+Trang Thay thế nhân sự có nút **Test kết nối AI**, dùng Ollama thật với dữ liệu
+mẫu nên không cần chuẩn bị yêu cầu thay ca. Luồng nghiệp vụ thật vẫn dùng
+deterministic fallback nếu Ollama không khả dụng.
 
 OpenAI là provider tùy chọn:
 
@@ -293,17 +315,18 @@ Kịch bản chi tiết và dữ liệu cần chuẩn bị:
 - `docs/dacn/14_RELEASE_DEMO_DACN_v1.0.md`
 - `docs/dacn/14_RELEASE_CHECKLIST_DACN_v1.0.md`
 - `docs/dacn/15_FINAL_ACCEPTANCE_DACN_v1.0.md`
+- `docs/dacn/16_STRETCH_GOALS_DACN_v1.1.md`
 
 Postman:
 `docs/postman/Wedding_Staff_Management_DACN_v1.postman_collection.json`.
 
 ## 13. Giới hạn có chủ đích
 
-- Không WebSocket/realtime dashboard.
+- Thông báo dùng polling 10 giây, chưa dùng WebSocket/SSE.
 - Không shift swap.
 - Không floorplan/drag-drop 2D/3D.
 - Không Maps routing.
-- Không Excel/PDF export.
+- Excel đang xuất CSV UTF-8 tương thích Excel; PDF dùng bản in tối ưu của trình duyệt.
 - Không Kubernetes/deployment platform.
 - Không để AI tự động ra quyết định nhân sự.
 - Chưa có browser E2E automation hoặc database-container integration suite; release dựa trên backend automated tests + production build + runtime/API/UI smoke.

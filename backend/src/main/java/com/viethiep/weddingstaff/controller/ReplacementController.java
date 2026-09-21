@@ -20,6 +20,18 @@ public class ReplacementController {
     private final CandidateRecommendationService candidateRecommendationService;
     private final AiRecommendationService aiRecommendationService;
 
+    @GetMapping("/ai/status")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
+    public AiStatusResponse aiStatus() {
+        return aiRecommendationService.aiStatus();
+    }
+
+    @PostMapping("/ai/test-connection")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
+    public AiConnectionTestResponse testAiConnection() {
+        return aiRecommendationService.testConnection();
+    }
+
     @GetMapping("/requests")
     @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
     public List<ReplacementRequestResponse> findAllRequests() {

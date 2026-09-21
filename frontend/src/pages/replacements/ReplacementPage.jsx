@@ -6,6 +6,8 @@ import {
   getMyReplacementInvitations,
   getMyReplacementRequests,
   getAiReplacementRecommendation,
+  getAiStatus,
+  testAiConnection,
   getReplacementCandidates,
   getReplacementRequests,
   inviteReplacementEmployee,
@@ -61,6 +63,9 @@ function ReplacementPage() {
   const [notice, setNotice] = useState('');
   const [reviewDialog, setReviewDialog] = useState(null);
   const [invitationDialog, setInvitationDialog] = useState(null);
+  const [aiStatus, setAiStatus] = useState(null);
+  const [aiTestResult, setAiTestResult] = useState(null);
+  const [aiTestLoading, setAiTestLoading] = useState(false);
 
   const loadData = async () => {
     try {
@@ -133,6 +138,23 @@ function ReplacementPage() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isManager]);
+
+  useEffect(() => {
+    if (!isManager) return;
+    getAiStatus().then(setAiStatus).catch(() => setAiStatus(null));
+  }, [isManager]);
+
+  const handleAiConnectionTest = async () => {
+    try {
+      setAiTestLoading(true);
+      setError('');
+      setAiTestResult(await testAiConnection());
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Không thể chạy AI demo nhanh.'));
+    } finally {
+      setAiTestLoading(false);
+    }
+  };
 
   const pendingInvitations = useMemo(
     () => invitations.filter((item) => item.status === 'PENDING'),
@@ -287,6 +309,24 @@ function ReplacementPage() {
 
       {notice && <div className="notice-box">{notice}</div>}
       {error && <div className="error-box">{error}</div>}
+
+      {isManager && aiStatus?.connectionTestAvailable && (
+        <div className="table-card replacement-ai-quick-test">
+          <div>
+            <strong>Kiểm tra AI thật — không cần tạo yêu cầu thay ca</strong>
+            <span>Provider {aiStatus.provider} · {aiStatus.model}. AI dùng dữ liệu mẫu, không tạo phân công.</span>
+          </div>
+          <button type="button" className="secondary-button" disabled={aiTestLoading} onClick={handleAiConnectionTest}>
+            {aiTestLoading ? 'AI đang trả lời...' : 'Test kết nối AI'}
+          </button>
+          {aiTestResult && <div className="replacement-ai-quick-result">
+            <strong>{aiTestResult.summary}</strong>
+            {(aiTestResult.candidates || []).map((candidate) => <div key={candidate.employeeId}>
+              #{candidate.aiRank} {candidate.employeeCode} · {candidate.fullName} — {candidate.explanation}
+            </div>)}
+          </div>}
+        </div>
+      )}
 
       {!isManager && (
         <>

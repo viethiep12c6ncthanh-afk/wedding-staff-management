@@ -2,6 +2,21 @@
   margin-bottom: 28px;
 }
 
+.attendance-demo-banner {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.attendance-demo-banner span {
+  font-size: 13px;
+}
+
 .attendance-feature-heading {
   display: flex;
   align-items: flex-start;

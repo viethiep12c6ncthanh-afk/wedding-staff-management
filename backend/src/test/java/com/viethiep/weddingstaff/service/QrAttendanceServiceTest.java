@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.config.AttendanceDemoProperties;
 import com.viethiep.weddingstaff.dto.AttendanceCheckSessionResponse;
 import com.viethiep.weddingstaff.dto.AttendanceResponse;
 import com.viethiep.weddingstaff.dto.CreateAttendanceCheckSessionRequest;
@@ -47,6 +48,8 @@ class QrAttendanceServiceTest {
     private AttendanceService attendanceService;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private AttendanceDemoProperties demoProperties;
 
     @InjectMocks
     private QrAttendanceService service;

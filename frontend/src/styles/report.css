@@ -12,6 +12,37 @@
   border-radius: 11px;
 }
 
+.report-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media print {
+  .sidebar,
+  .topbar,
+  .report-filter-card,
+  .report-export-actions,
+  .mobile-overlay {
+    display: none !important;
+  }
+
+  .main-shell,
+  .main-content {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .table-scroll {
+    overflow: visible !important;
+  }
+
+  .payroll-table {
+    font-size: 9px;
+  }
+}
+
 .report-filter-card label {
   display: flex;
   flex-direction: column;

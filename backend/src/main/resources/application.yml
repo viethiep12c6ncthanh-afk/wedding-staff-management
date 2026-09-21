@@ -28,6 +28,9 @@ app:
     admin-password: "${SEED_ADMIN_PASSWORD:}"
     coordinator-password: "${SEED_COORDINATOR_PASSWORD:}"
     employee-password: "${SEED_EMPLOYEE_PASSWORD:}"
+  attendance:
+    demo:
+      enabled: ${ATTENDANCE_DEMO_ENABLED:false}
   ai:
     enabled: ${AI_ENABLED:false}
     provider: ${AI_PROVIDER:OLLAMA}

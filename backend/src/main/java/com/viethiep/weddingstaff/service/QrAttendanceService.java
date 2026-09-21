@@ -1,5 +1,6 @@
 package com.viethiep.weddingstaff.service;
 
+import com.viethiep.weddingstaff.config.AttendanceDemoProperties;
 import com.viethiep.weddingstaff.dto.AttendanceCheckSessionResponse;
 import com.viethiep.weddingstaff.dto.AttendanceResponse;
 import com.viethiep.weddingstaff.dto.CreateAttendanceCheckSessionRequest;
@@ -55,6 +56,7 @@ public class QrAttendanceService {
     private final UserAccountRepository userRepository;
     private final AttendanceService attendanceService;
     private final PasswordEncoder passwordEncoder;
+    private final AttendanceDemoProperties demoProperties;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -93,11 +95,16 @@ public class QrAttendanceService {
                 ? DEFAULT_SESSION_MINUTES
                 : request.validMinutes();
 
-        LocalDateTime actionWindowEnd = actionWindowEnd(shift, request.action());
         LocalDateTime requestedExpiry = now.plusMinutes(validMinutes);
-        LocalDateTime expiresAt = requestedExpiry.isBefore(actionWindowEnd)
-                ? requestedExpiry
-                : actionWindowEnd;
+        LocalDateTime expiresAt;
+        if (isDemoMode()) {
+            expiresAt = requestedExpiry;
+        } else {
+            LocalDateTime actionWindowEnd = actionWindowEnd(shift, request.action());
+            expiresAt = requestedExpiry.isBefore(actionWindowEnd)
+                    ? requestedExpiry
+                    : actionWindowEnd;
+        }
 
         if (!expiresAt.isAfter(now)) {
             throw new IllegalStateException(
@@ -431,6 +438,9 @@ public class QrAttendanceService {
             AttendanceCheckAction action,
             LocalDateTime now
     ) {
+        if (isDemoMode()) {
+            return;
+        }
         LocalDateTime windowStart = action == AttendanceCheckAction.CHECK_IN
                 ? shift.getStartAt().minusMinutes(CHECK_IN_EARLY_MINUTES)
                 : shift.getStartAt();
@@ -444,6 +454,10 @@ public class QrAttendanceService {
                             : "Chưa đến hoặc đã quá thời gian tự check-out"
             );
         }
+    }
+
+    public boolean isDemoMode() {
+        return demoProperties != null && demoProperties.isEnabled();
     }
 
     private LocalDateTime actionWindowEnd(

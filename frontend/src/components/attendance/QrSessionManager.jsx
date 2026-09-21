@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import {
   createAttendanceCheckSession,
+  getAttendanceDemoConfig,
   revokeAttendanceCheckSession,
 } from '../../api/qrAttendanceApi';
 import { getShifts } from '../../api/shiftApi';
@@ -52,14 +53,16 @@ function QrSessionManager() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [revokeOpen, setRevokeOpen] = useState(false);
+  const [demoConfig, setDemoConfig] = useState({ enabled: false, warning: '' });
 
   useEffect(() => {
     let active = true;
 
-    getShifts()
-      .then((data) => {
+    Promise.all([getShifts(), getAttendanceDemoConfig()])
+      .then(([data, config]) => {
         if (active) {
           setShifts(data);
+          setDemoConfig(config);
         }
       })
       .catch((err) => {
@@ -83,9 +86,9 @@ function QrSessionManager() {
       shifts.filter(
         (shift) =>
           ['OPEN', 'CLOSED', 'IN_PROGRESS'].includes(shift.shiftStatus) &&
-          isWithinActionWindow(shift, form.action),
+          (demoConfig.enabled || isWithinActionWindow(shift, form.action)),
       ),
-    [form.action, shifts],
+    [demoConfig.enabled, form.action, shifts],
   );
 
   useEffect(() => {
@@ -218,6 +221,13 @@ function QrSessionManager() {
         </div>
       </div>
 
+      {demoConfig.warning && (
+        <div className={demoConfig.enabled ? 'attendance-demo-banner' : 'report-note'}>
+          <strong>{demoConfig.enabled ? 'Chế độ demo nhanh' : 'Chế độ thời gian thật'}</strong>
+          <span>{demoConfig.warning}</span>
+        </div>
+      )}
+
       {notice && <div className="notice-box">{notice}</div>}
       {error && <div className="error-box">{error}</div>}
 
@@ -240,7 +250,7 @@ function QrSessionManager() {
               required
               disabled={loading}
             >
-              <option value="">Chọn ca đang trong cửa sổ chấm công</option>
+              <option value="">{demoConfig.enabled ? 'Chọn ca để test ngay' : 'Chọn ca đang trong cửa sổ chấm công'}</option>
               {availableShifts.map((shift) => (
                 <option key={shift.id} value={shift.id}>
                   #{shift.id} — {shift.name} — {shift.eventName}
@@ -341,7 +351,9 @@ function QrSessionManager() {
 
           {!loading && availableShifts.length === 0 && (
             <div className="muted-text">
-              Không có ca nào đang nằm trong cửa sổ {actionLabels[form.action]} theo đồng hồ trình duyệt.
+              {demoConfig.enabled
+                ? 'Không có ca OPEN/CLOSED/IN_PROGRESS phù hợp. Hãy tạo ca và phân công nhân viên trước.'
+                : `Không có ca nào đang nằm trong cửa sổ ${actionLabels[form.action]} theo đồng hồ trình duyệt.`}
             </div>
           )}
         </form>

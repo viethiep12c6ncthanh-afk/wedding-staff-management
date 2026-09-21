@@ -1,5 +1,15 @@
 import axiosClient from './axiosClient';
 
+export const getAiStatus = async () => {
+  const response = await axiosClient.get('/replacements/ai/status');
+  return response.data;
+};
+
+export const testAiConnection = async () => {
+  const response = await axiosClient.post('/replacements/ai/test-connection');
+  return response.data;
+};
+
 export const getReplacementRequests = async () => {
   const response = await axiosClient.get('/replacements/requests');
   return response.data;

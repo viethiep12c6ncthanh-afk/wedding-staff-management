@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viethiep.weddingstaff.config.AiRecommendationProperties;
 import com.viethiep.weddingstaff.dto.AiRecommendationResponse;
+import com.viethiep.weddingstaff.dto.AiConnectionTestResponse;
+import com.viethiep.weddingstaff.dto.AiStatusResponse;
 import com.viethiep.weddingstaff.dto.AiRecommendedCandidateResponse;
 import com.viethiep.weddingstaff.dto.ReplacementCandidateResponse;
 import com.viethiep.weddingstaff.entity.*;
@@ -36,6 +38,34 @@ public class AiRecommendationService {
     private final AiRecommendationClient aiClient;
     private final AiRecommendationProperties properties;
     private final ObjectMapper objectMapper;
+
+    public AiStatusResponse aiStatus() {
+        return new AiStatusResponse(
+                aiClient.isAvailable(), aiClient.provider(), aiClient.model(),
+                aiClient.isAvailable());
+    }
+
+    public AiConnectionTestResponse testConnection() {
+        if (!aiClient.isAvailable()) {
+            throw new IllegalStateException("AI chưa được bật hoặc chưa được cấu hình");
+        }
+        String context = """
+                {"candidates":[
+                  {"employeeId":9001,"deterministicScore":92,"reputationScore":88,"reliabilityPercent":95},
+                  {"employeeId":9002,"deterministicScore":84,"reputationScore":80,"reliabilityPercent":78}
+                ]}
+                """;
+        AiRecommendationClient.Result result = aiClient.recommend(new AiRecommendationClient.Prompt(context));
+        List<AiRecommendedCandidateResponse> candidates = new ArrayList<>();
+        for (int index = 0; index < result.candidates().size(); index++) {
+            AiRecommendationClient.CandidateAnalysis item = result.candidates().get(index);
+            int score = index == 0 ? 92 : 84;
+            candidates.add(new AiRecommendedCandidateResponse(index + 1, item.employeeId(),
+                    "DEMO-0" + (index + 1), index == 0 ? "Nguyễn Minh Demo" : "Trần An Demo",
+                    index + 1, score, item.explanation(), item.strengths(), item.risks()));
+        }
+        return new AiConnectionTestResponse(aiClient.provider(), aiClient.model(), result.summary(), candidates);
+    }
 
     @Transactional
     public AiRecommendationResponse recommend(

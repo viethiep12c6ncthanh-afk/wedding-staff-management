@@ -31,6 +31,7 @@ const managementGroups = [
     label: 'Báo cáo',
     items: [
       { path: '/reports', label: 'Báo cáo tiền công' },
+      { path: '/audit', label: 'Nhật ký vận hành', roles: ['ADMIN'] },
     ],
   },
 ];
@@ -93,7 +94,7 @@ function Sidebar({ open = false, onNavigate, onClose }) {
             <div className="sidebar-group-label">{group.label}</div>
 
             <div className="sidebar-group-links">
-              {group.items.map((item) => (
+              {group.items.filter((item) => !item.roles || item.roles.includes(role)).map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}

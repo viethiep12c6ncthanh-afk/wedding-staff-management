@@ -1,5 +1,10 @@
 import axiosClient from './axiosClient';
 
+export const getAttendanceDemoConfig = async () => {
+  const response = await axiosClient.get('/qr-attendance/demo-config');
+  return response.data;
+};
+
 export const createAttendanceCheckSession = async (payload) => {
   const response = await axiosClient.post('/qr-attendance/sessions', payload);
   return response.data;

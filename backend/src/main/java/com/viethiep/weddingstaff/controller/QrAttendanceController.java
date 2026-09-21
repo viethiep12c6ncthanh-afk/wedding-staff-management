@@ -1,6 +1,7 @@
 package com.viethiep.weddingstaff.controller;
 
 import com.viethiep.weddingstaff.dto.AttendanceCheckSessionResponse;
+import com.viethiep.weddingstaff.dto.AttendanceDemoConfigResponse;
 import com.viethiep.weddingstaff.dto.CreateAttendanceCheckSessionRequest;
 import com.viethiep.weddingstaff.dto.QrAttendanceResultResponse;
 import com.viethiep.weddingstaff.dto.SelfAttendanceRequest;
@@ -16,6 +17,18 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class QrAttendanceController {
     private final QrAttendanceService qrAttendanceService;
+
+    @GetMapping("/demo-config")
+    @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
+    public AttendanceDemoConfigResponse demoConfig() {
+        boolean enabled = qrAttendanceService.isDemoMode();
+        return new AttendanceDemoConfigResponse(
+                enabled,
+                enabled
+                        ? "DEMO MODE đang bật: bỏ kiểm tra khung giờ ca, nhưng vẫn kiểm tra phân công, QR/OTP, hạn phiên, GPS và chống chấm công trùng."
+                        : "Production rules đang bật: phiên chỉ được tạo và sử dụng trong khung giờ chấm công."
+        );
+    }
 
     @PostMapping("/sessions")
     @PreAuthorize("hasAnyRole('ADMIN','COORDINATOR')")
