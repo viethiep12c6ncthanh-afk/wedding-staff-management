@@ -3,6 +3,7 @@ package com.viethiep.weddingstaff.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viethiep.weddingstaff.config.AiRecommendationProperties;
 import com.viethiep.weddingstaff.dto.AiRecommendationResponse;
+import com.viethiep.weddingstaff.dto.AiConnectionTestResponse;
 import com.viethiep.weddingstaff.dto.ReplacementCandidateResponse;
 import com.viethiep.weddingstaff.entity.*;
 import com.viethiep.weddingstaff.enumtype.*;
@@ -172,6 +173,27 @@ class AiRecommendationServiceTest {
                         && !run.isFallbackUsed()
                         && run.getAiResultJson() != null
         ));
+    }
+
+    @Test
+    void connectionTestUsesRealDatabaseCandidatesWithoutDemoIdentity() {
+        when(aiClient.isAvailable()).thenReturn(true);
+        when(candidateService.findRealCandidatesForAiTest(5))
+                .thenReturn(List.of(first, second));
+        when(aiClient.recommend(any())).thenReturn(new AiRecommendationClient.Result(
+                "{}",
+                "Đã phân tích dữ liệu nhân viên thật.",
+                List.of(analysis(22L), analysis(21L))
+        ));
+
+        AiConnectionTestResponse response = service.testConnection();
+
+        assertEquals("MYSQL_REAL_EMPLOYEES", response.dataSource());
+        assertEquals(2, response.inputCandidateCount());
+        assertEquals("NV022", response.candidates().get(0).employeeCode());
+        assertEquals("Nguyễn B", response.candidates().get(0).fullName());
+        assertTrue(response.candidates().stream()
+                .noneMatch(candidate -> candidate.employeeCode().startsWith("DEMO-")));
     }
 
     @Test

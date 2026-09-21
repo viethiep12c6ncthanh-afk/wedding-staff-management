@@ -169,9 +169,9 @@ AI_MODEL=qwen3:4b-instruct
 
 Khởi động lại backend sau khi đổi biến môi trường. QR demo chỉ bỏ kiểm tra cửa
 sổ giờ; phân công, hạn phiên, QR/OTP, GPS và chống thao tác trùng vẫn được giữ.
-Trang Thay thế nhân sự có nút **Test kết nối AI**, dùng Ollama thật với dữ liệu
-mẫu nên không cần chuẩn bị yêu cầu thay ca. Luồng nghiệp vụ thật vẫn dùng
-deterministic fallback nếu Ollama không khả dụng.
+Trang Thay thế nhân sự có nút **Phân tích dữ liệu thật**, dùng Ollama với các
+nhân viên `ACTIVE` lấy trực tiếp từ MySQL nên không cần tạo yêu cầu thay ca giả.
+Luồng nghiệp vụ theo ca vẫn dùng deterministic fallback nếu Ollama không khả dụng.
 
 OpenAI là provider tùy chọn:
 

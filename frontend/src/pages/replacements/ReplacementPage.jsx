@@ -313,14 +313,15 @@ function ReplacementPage() {
       {isManager && aiStatus?.connectionTestAvailable && (
         <div className="table-card replacement-ai-quick-test">
           <div>
-            <strong>Kiểm tra AI thật — không cần tạo yêu cầu thay ca</strong>
-            <span>Provider {aiStatus.provider} · {aiStatus.model}. AI dùng dữ liệu mẫu, không tạo phân công.</span>
+            <strong>Kiểm tra AI bằng dữ liệu nhân viên thật</strong>
+            <span>Provider {aiStatus.provider} · {aiStatus.model}. Đọc dữ liệu MySQL, không tạo yêu cầu hay phân công.</span>
           </div>
           <button type="button" className="secondary-button" disabled={aiTestLoading} onClick={handleAiConnectionTest}>
-            {aiTestLoading ? 'AI đang trả lời...' : 'Test kết nối AI'}
+            {aiTestLoading ? 'AI đang phân tích...' : 'Phân tích dữ liệu thật'}
           </button>
           {aiTestResult && <div className="replacement-ai-quick-result">
-            <strong>{aiTestResult.summary}</strong>
+            <strong>Nguồn: MySQL · {aiTestResult.inputCandidateCount} nhân viên thật</strong>
+            <span>{aiTestResult.summary}</span>
             {(aiTestResult.candidates || []).map((candidate) => <div key={candidate.employeeId}>
               #{candidate.aiRank} {candidate.employeeCode} · {candidate.fullName} — {candidate.explanation}
             </div>)}

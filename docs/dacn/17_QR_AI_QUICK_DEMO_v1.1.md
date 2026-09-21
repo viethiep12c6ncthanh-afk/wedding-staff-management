@@ -25,13 +25,16 @@ Khởi động lại backend. Đây là cấu hình dành cho demo/dev, không d
 Demo mode chỉ bỏ điều kiện giờ ca. Token, OTP băm, hạn phiên, phân công, GPS,
 ownership, action và duplicate protection vẫn được kiểm tra.
 
-## Test AI thật bằng Ollama, không cần tạo dữ liệu thay ca
+## Test AI thật bằng Ollama và dữ liệu MySQL thật
 
 1. ADMIN/COORDINATOR mở **Thay thế nhân sự**.
 2. Đảm bảo Ollama đang chạy và đã có model `qwen3:4b-instruct`.
-3. Ở thẻ **Kiểm tra AI thật**, bấm **Test kết nối AI**.
-4. Backend gửi dữ liệu ứng viên mẫu tới Ollama thật và hiển thị kết quả trả về.
-4. Khi muốn test luồng thật, mở một yêu cầu thay ca `OPEN` có ứng viên và bấm
+3. Ở thẻ **Kiểm tra AI bằng dữ liệu nhân viên thật**, bấm
+   **Phân tích dữ liệu thật**.
+4. Backend lấy nhân viên `ACTIVE` từ MySQL, tính điểm từ uy tín, độ ổn định và
+   lịch sử hoàn thành ca rồi gửi đúng các ID đó tới Ollama. Thao tác không tạo
+   yêu cầu thay ca hoặc phân công mới.
+5. Khi muốn test luồng theo ca cụ thể, mở một yêu cầu thay ca `OPEN` có ứng viên và bấm
    **Phân tích bằng AI** trong chính yêu cầu đó.
 
 Lệnh chuẩn bị Ollama:

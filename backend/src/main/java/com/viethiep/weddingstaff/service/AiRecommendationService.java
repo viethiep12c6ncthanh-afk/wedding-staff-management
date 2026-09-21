@@ -45,26 +45,89 @@ public class AiRecommendationService {
                 aiClient.isAvailable());
     }
 
+    @Transactional(readOnly = true)
     public AiConnectionTestResponse testConnection() {
         if (!aiClient.isAvailable()) {
             throw new IllegalStateException("AI chưa được bật hoặc chưa được cấu hình");
         }
-        String context = """
-                {"candidates":[
-                  {"employeeId":9001,"deterministicScore":92,"reputationScore":88,"reliabilityPercent":95},
-                  {"employeeId":9002,"deterministicScore":84,"reputationScore":80,"reliabilityPercent":78}
-                ]}
-                """;
+        int candidateLimit = clamp(properties.getCandidateLimit(), 1, MAX_CANDIDATES);
+        List<ReplacementCandidateResponse> realCandidates =
+                candidateRecommendationService.findRealCandidatesForAiTest(candidateLimit);
+        if (realCandidates.isEmpty()) {
+            throw new IllegalStateException(
+                    "Không có nhân viên thật đang hoạt động để kiểm tra AI"
+            );
+        }
+
+        String context = buildRealEmployeeTestContext(realCandidates);
         AiRecommendationClient.Result result = aiClient.recommend(new AiRecommendationClient.Prompt(context));
+        if (!isValidAiResult(result, realCandidates)) {
+            throw new IllegalStateException(
+                    "Kết quả AI không hợp lệ hoặc chứa nhân viên ngoài dữ liệu hệ thống"
+            );
+        }
+
+        Map<Long, ReplacementCandidateResponse> realCandidatesById = realCandidates
+                .stream()
+                .collect(Collectors.toMap(
+                        ReplacementCandidateResponse::employeeId,
+                        Function.identity()
+                ));
         List<AiRecommendedCandidateResponse> candidates = new ArrayList<>();
         for (int index = 0; index < result.candidates().size(); index++) {
             AiRecommendationClient.CandidateAnalysis item = result.candidates().get(index);
-            int score = index == 0 ? 92 : 84;
-            candidates.add(new AiRecommendedCandidateResponse(index + 1, item.employeeId(),
-                    "DEMO-0" + (index + 1), index == 0 ? "Nguyễn Minh Demo" : "Trần An Demo",
-                    index + 1, score, item.explanation(), item.strengths(), item.risks()));
+            ReplacementCandidateResponse source = realCandidatesById.get(item.employeeId());
+            candidates.add(new AiRecommendedCandidateResponse(
+                    index + 1,
+                    source.employeeId(),
+                    source.employeeCode(),
+                    source.fullName(),
+                    source.rank(),
+                    source.totalScore(),
+                    limitText(item.explanation(), 1000),
+                    sanitizeList(item.strengths()),
+                    sanitizeList(item.risks())
+            ));
         }
-        return new AiConnectionTestResponse(aiClient.provider(), aiClient.model(), result.summary(), candidates);
+        return new AiConnectionTestResponse(
+                aiClient.provider(),
+                aiClient.model(),
+                "MYSQL_REAL_EMPLOYEES",
+                realCandidates.size(),
+                limitText(result.summary(), 2000),
+                candidates
+        );
+    }
+
+    private String buildRealEmployeeTestContext(
+            List<ReplacementCandidateResponse> candidates
+    ) {
+        Map<String, Object> context = new LinkedHashMap<>();
+        context.put("purpose", "CONNECTION_TEST_WITH_REAL_DATABASE_EMPLOYEES");
+        context.put("dataSource", "MYSQL_REAL_EMPLOYEES");
+        context.put("warning", "Không phải đề xuất cho một ca cụ thể");
+        context.put("decisionPolicy", Map.of(
+                "aiMayOnlyReorderProvidedEmployeeIds", true,
+                "coordinatorMakesFinalDecision", true
+        ));
+        context.put("candidates", candidates.stream().map(candidate -> {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("employeeId", candidate.employeeId());
+            item.put("employeeCode", candidate.employeeCode());
+            item.put("deterministicRank", candidate.rank());
+            item.put("deterministicScore", candidate.totalScore());
+            item.put("reputationScore", candidate.reputationScore());
+            item.put("reliabilityPercent", candidate.reliabilityPercent());
+            item.put("completedShiftCount", candidate.completedShiftCount());
+            item.put("recentEvaluations", evaluationRepository
+                    .findAllByEmployeeId(candidate.employeeId())
+                    .stream()
+                    .limit(clamp(properties.getRecentEvaluationLimit(), 0, MAX_EVALUATIONS))
+                    .map(this::evaluationContext)
+                    .toList());
+            return item;
+        }).toList());
+        return writeJson(context);
     }
 
     @Transactional

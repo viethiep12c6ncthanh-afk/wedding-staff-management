@@ -97,6 +97,45 @@ public class CandidateRecommendationService {
         return responses;
     }
 
+    /**
+     * Lấy nhân viên thật đang hoạt động để kiểm tra kết nối AI mà không tạo dữ
+     * liệu nghiệp vụ giả. Danh sách này chỉ kiểm tra khả năng phân tích dữ liệu
+     * thật; việc đề xuất cho một ca cụ thể vẫn đi qua findCandidates(requestId).
+     */
+    @Transactional(readOnly = true)
+    public List<ReplacementCandidateResponse> findRealCandidatesForAiTest(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 10));
+        Map<Long, EmployeeReputation> reputationByEmployeeId = reputationRepository
+                .findAllWithEmployee()
+                .stream()
+                .collect(Collectors.toMap(
+                        reputation -> reputation.getEmployee().getId(),
+                        Function.identity()
+                ));
+
+        List<ScoredCandidate> scored = employeeRepository
+                .findCandidatePool(
+                        EmployeeStatus.ACTIVE,
+                        AccountStatus.ACTIVE,
+                        RoleName.EMPLOYEE
+                )
+                .stream()
+                .map(employee -> score(
+                        employee,
+                        reputationByEmployeeId.get(employee.getId()),
+                        ShiftRole.STAFF
+                ))
+                .sorted(candidateComparator())
+                .limit(safeLimit)
+                .toList();
+
+        List<ReplacementCandidateResponse> responses = new ArrayList<>();
+        for (int index = 0; index < scored.size(); index++) {
+            responses.add(toResponse(index + 1, scored.get(index)));
+        }
+        return responses;
+    }
+
     private ScoredCandidate score(
             Employee employee,
             EmployeeReputation reputation,
