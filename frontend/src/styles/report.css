@@ -18,28 +18,178 @@
   gap: 0.75rem;
 }
 
+.report-print-header {
+  display: none;
+}
+
+@page {
+  size: A4 landscape;
+  margin: 9mm;
+}
+
 @media print {
+  html,
+  body {
+    width: auto !important;
+    min-width: 0 !important;
+    background: #ffffff !important;
+    color: #172033 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   .sidebar,
   .topbar,
   .report-filter-card,
   .report-export-actions,
-  .mobile-overlay {
+  .mobile-overlay,
+  .notification-popover {
     display: none !important;
   }
 
+  .app-shell,
+  .app-main,
   .main-shell,
-  .main-content {
+  .main-content,
+  .content-area {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
     display: block !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
+  .payroll-report-page {
+    width: 100%;
+    font-size: 9px;
+  }
+
+  .report-print-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .payroll-report-page .page-heading {
+    margin-bottom: 8px;
+  }
+
+  .payroll-report-page .page-heading h1 {
+    margin: 0 0 2px;
+    font-size: 21px;
+    line-height: 1.15;
+  }
+
+  .payroll-report-page .page-heading p {
+    margin: 0;
+    font-size: 9px;
+  }
+
+  .report-note {
+    margin-bottom: 7px;
+    padding: 6px 8px;
+    font-size: 7.5px;
+    line-height: 1.35;
+  }
+
+  .payroll-stats-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .payroll-stat-card {
+    min-height: 0;
+    padding: 8px;
+    border-radius: 6px;
+    break-inside: avoid;
+  }
+
+  .payroll-stat-label {
+    font-size: 7px;
+  }
+
+  .payroll-stat-value {
+    margin-top: 4px;
+    font-size: 16px;
+  }
+
+  .payroll-stat-detail {
+    padding-top: 4px;
+    font-size: 6.5px;
+  }
+
+  .report-period {
+    margin-bottom: 6px;
+    font-size: 8px;
+  }
+
+  .table-card {
+    overflow: visible !important;
+    border-radius: 6px;
+  }
+
   .table-scroll {
+    width: 100% !important;
     overflow: visible !important;
   }
 
   .payroll-table {
-    font-size: 9px;
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+    font-size: 7px;
+  }
+
+  .payroll-table thead {
+    display: table-header-group;
+  }
+
+  .payroll-table tr {
+    break-inside: avoid;
+  }
+
+  .payroll-table th,
+  .payroll-table td {
+    padding: 5px 4px;
+    font-size: 7px;
+    line-height: 1.25;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  .payroll-table-manager th:nth-child(1) { width: 8%; }
+  .payroll-table-manager th:nth-child(2) { width: 17%; }
+  .payroll-table-manager th:nth-child(3) { width: 7%; }
+  .payroll-table-manager th:nth-child(4) { width: 7%; }
+  .payroll-table-manager th:nth-child(5) { width: 6%; }
+  .payroll-table-manager th:nth-child(6) { width: 10%; }
+  .payroll-table-manager th:nth-child(7) { width: 10%; }
+  .payroll-table-manager th:nth-child(8) { width: 8%; }
+  .payroll-table-manager th:nth-child(9) { width: 9%; }
+  .payroll-table-manager th:nth-child(10) { width: 9%; }
+  .payroll-table-manager th:nth-child(11) { width: 9%; }
+
+  .payroll-table-employee th:nth-child(1) { width: 19%; }
+  .payroll-table-employee th:nth-child(2),
+  .payroll-table-employee th:nth-child(3) { width: 8%; }
+  .payroll-table-employee th:nth-child(4) { width: 7%; }
+  .payroll-table-employee th:nth-child(n+5) { width: 9.5%; }
+
+  .payroll-table .cell-title {
+    font-size: 7px;
+  }
+
+  .payroll-table .cell-subtitle {
+    margin-top: 1px;
+    font-size: 6px;
   }
 }
 

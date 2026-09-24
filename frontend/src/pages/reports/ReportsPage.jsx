@@ -121,6 +121,8 @@ function ReportsPage() {
 
   const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
 
+  const exportRange = `${report?.from || 'dau'}-${report?.to || 'nay'}`;
+
   const exportExcel = () => {
     if (!report) return;
     const headers = ['Mã NV', 'Nhân viên', 'Ca xác nhận', 'Ca trả công', 'Ca vắng',
@@ -129,20 +131,42 @@ function ReportsPage() {
       employee.confirmedShiftCount, employee.paidShiftCount, employee.absentShiftCount,
       employee.totalBasePay, employee.totalLeaderAllowance, employee.totalOvertimePay,
       employee.totalLateDeduction, employee.totalEarlyLeaveDeduction, employee.totalPayable]);
-    const csv = [headers, ...rows].map((row) => row.map(escapeCsv).join(',')).join('\r\n');
+    // Excel/WPS installations using Vietnamese regional settings expect a
+    // semicolon separator. The sep directive also makes the delimiter
+    // explicit when the file is opened directly instead of imported.
+    const delimiter = ';';
+    const csvRows = [headers, ...rows]
+      .map((row) => row.map(escapeCsv).join(delimiter));
+    const csv = [`sep=${delimiter}`, ...csvRows].join('\r\n');
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `bao-cao-tien-cong-${report.from || 'dau'}-${report.to || 'nay'}.csv`;
+    link.download = `bao-cao-tien-cong-${exportRange}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
-  const exportPdf = () => window.print();
+  const exportPdf = () => {
+    const previousTitle = document.title;
+    const restoreTitle = () => {
+      document.title = previousTitle;
+    };
+
+    document.title = `bao-cao-tien-cong-${exportRange}`;
+    window.addEventListener('afterprint', restoreTitle, { once: true });
+    window.print();
+  };
 
   return (
-    <section>
+    <section className="payroll-report-page">
+      <div className="report-print-header" aria-hidden="true">
+        <strong>WEDDING STAFF MANAGEMENT</strong>
+        <span>
+          Xuất lúc {new Date().toLocaleString('vi-VN')}
+        </span>
+      </div>
+
       <div className="page-heading">
         <div>
           <h1>
@@ -292,7 +316,13 @@ function ReportsPage() {
 
           <div className="table-card">
             <div className="table-scroll">
-              <table className="data-table payroll-table">
+              <table
+                className={`data-table payroll-table ${
+                  isEmployee
+                    ? 'payroll-table-employee'
+                    : 'payroll-table-manager'
+                }`}
+              >
                 <thead>
                   <tr>
                     {!isEmployee && <th>Mã NV</th>}

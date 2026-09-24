@@ -34,7 +34,7 @@ class OllamaRecommendationClientTest {
         assertEquals("qwen3:4b-instruct", root.path("model").asText());
         assertFalse(root.path("stream").asBoolean(true));
         assertEquals("5m", root.path("keep_alive").asText());
-        assertEquals("object", root.path("format").path("type").asText());
+        assertEquals("json", root.path("format").asText());
         assertEquals(0, root.path("options").path("temperature").asInt());
         assertEquals(768, root.path("options").path("num_predict").asInt());
         assertEquals("system", root.path("messages").get(0).path("role").asText());

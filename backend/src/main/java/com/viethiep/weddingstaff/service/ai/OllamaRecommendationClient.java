@@ -38,6 +38,9 @@ public class OllamaRecommendationClient implements AiRecommendationClient {
             Không sử dụng tuổi, giới tính, địa chỉ nhà hoặc hoàn cảnh cá nhân để xếp hạng.
             Không tự quyết định phân công hay gửi lời mời thay ca.
             Giải thích ngắn, cụ thể, bằng tiếng Việt và nêu cả điểm mạnh lẫn rủi ro nếu có.
+            Chỉ trả về một JSON hợp lệ theo đúng cấu trúc:
+            {"summary":"...","candidates":[{"employeeId":1,"explanation":"...","strengths":["..."],"risks":["..."]}]}.
+            Phải trả về đủ toàn bộ employeeId đã nhận, mỗi employeeId đúng một lần.
             """;
 
     private final AiRecommendationProperties properties;
@@ -116,7 +119,7 @@ public class OllamaRecommendationClient implements AiRecommendationClient {
         user.put("role", "user");
         user.put("content", prompt.contextJson());
 
-        root.set("format", buildSchema());
+        root.put("format", "json");
         ObjectNode options = root.putObject("options");
         options.put("temperature", 0);
         options.put("num_predict", 768);

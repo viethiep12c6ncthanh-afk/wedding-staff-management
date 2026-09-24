@@ -126,13 +126,13 @@ class AiRecommendationServiceTest {
         first = candidate(1, 21L, "NV021", "Nguyễn A", 80);
         second = candidate(2, 22L, "NV022", "Nguyễn B", 75);
         lenient().when(candidateService.findCandidates(40L)).thenReturn(List.of(first, second));
-        when(requestRepository.findByIdWithDetails(40L)).thenReturn(Optional.of(request));
-        when(userRepository.findByUsername("admin")).thenReturn(Optional.of(actor));
+        lenient().when(requestRepository.findByIdWithDetails(40L)).thenReturn(Optional.of(request));
+        lenient().when(userRepository.findByUsername("admin")).thenReturn(Optional.of(actor));
         lenient().when(evaluationRepository.findAllByEmployeeId(anyLong())).thenReturn(List.of());
         when(aiClient.provider()).thenReturn("OPENAI");
         when(aiClient.model()).thenReturn("test-model");
         AtomicLong ids = new AtomicLong(100);
-        when(runRepository.saveAndFlush(any())).thenAnswer(invocation -> {
+        lenient().when(runRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             AiRecommendationRun run = invocation.getArgument(0);
             run.setId(ids.getAndIncrement());
             return run;
