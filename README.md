@@ -249,7 +249,7 @@ cd backend
 mvn clean test
 ```
 
-Baseline release hiện tại: **94 tests, 0 failures, 0 errors**.
+Baseline release hiện tại: **97 tests, 0 failures, 0 errors, 0 skipped**.
 
 Frontend:
 

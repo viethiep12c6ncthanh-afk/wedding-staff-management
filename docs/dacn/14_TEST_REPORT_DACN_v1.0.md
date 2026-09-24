@@ -7,7 +7,7 @@ Final hardening baseline trước Commit 14:
 ```text
 mvn clean test
 
-Tests run: 94
+Tests run: 97
 Failures: 0
 Errors: 0
 Skipped: 0
@@ -54,7 +54,7 @@ BUILD SUCCESS
 npm run build
 
 vite v8.2.1
-160 modules transformed
+164 modules transformed
 BUILD PASS
 ```
 
@@ -176,7 +176,7 @@ backend automated tests
 + manual runtime API/security/UI smoke
 ```
 
-không gọi toàn bộ 94 tests là “full end-to-end integration tests”.
+không gọi toàn bộ 97 tests là “full end-to-end integration tests”.
 
 ## 9. Final release gate
 

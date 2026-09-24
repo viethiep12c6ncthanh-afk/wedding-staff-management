@@ -30,7 +30,7 @@ Technology: Java 21, Spring Boot, Spring Security + JWT, JPA/Hibernate, MySQL, R
 ## 4. Automated backend regression
 
 ```text
-Tests run: 94
+Tests run: 97
 Failures: 0
 Errors: 0
 Skipped: 0
@@ -83,7 +83,7 @@ When AI is disabled or unavailable, deterministic recommendation remains the des
 - No shift swap.
 - No 2D/3D floorplan drag-and-drop.
 - No Maps routing.
-- No Excel/PDF export.
+- No native XLSX export; payroll report supports CSV export and browser Print/PDF.
 - No Kubernetes deployment.
 - No autonomous AI staffing decision.
 - No full browser E2E automation suite.
